@@ -576,20 +576,98 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
     evalKeys: {}, updated: null
   });
 
-  let S = load();
+  let S = blankState();
   let step = sessionStorage.getItem('dm-step') || 'home';
   let ui = { qualOpen: null, printSel: null, printMode: null, gpOpen: {}, gpSort: sessionStorage.getItem('dm-gpsort') || 'input' };
 
-  function load() {
-    try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.v === 1) return Object.assign(blankState(), s); } catch (e) { }
-    return blankState();
+  // ── 접속 비밀번호 + 저장 자료 암호화 ──────────────────────────
+  //  · 비밀번호 자체는 파일에 넣지 않고 PBKDF2(SHA-256, 20만 회) 검증값만 보관
+  //  · 브라우저 저장소의 자료는 비밀번호에서 만든 키로 AES-GCM 암호화(외부 라이브러리 없이 브라우저 내장 Web Crypto 사용)
+  const KEY_ENC = 'dm2025-main-enc-v1';
+  const PW_VERIFIER = 'cc50a3d1d937c66857e61b2059fa3ba34164389994432a988770b07cfabbfcd7';
+  const PW_SALT = 'dm2025-verifier-v1', ITER = 200000;
+  const IDLE_MIN = 30;
+  let cryptoKey = null, encSalt = null;
+  const te = new TextEncoder(), td = new TextDecoder();
+  const b64 = u8 => btoa(String.fromCharCode(...new Uint8Array(u8)));
+  const ub64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  const hex = buf => [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2, '0')).join('');
+  async function pbkdf2Bits(pw, salt) {
+    const base = await crypto.subtle.importKey('raw', te.encode(pw), 'PBKDF2', false, ['deriveBits', 'deriveKey']);
+    return { base, bits: await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: typeof salt === 'string' ? te.encode(salt) : salt, iterations: ITER, hash: 'SHA-256' }, base, 256) };
+  }
+  async function aesKey(pw, salt) {
+    const base = await crypto.subtle.importKey('raw', te.encode(pw), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: ITER, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  }
+  async function unlock(pw) {
+    const { bits } = await pbkdf2Bits(pw, PW_SALT);
+    if (hex(bits) !== PW_VERIFIER) return false;
+    let blob = null; try { blob = JSON.parse(localStorage.getItem(KEY_ENC)); } catch (e) { }
+    encSalt = blob && blob.salt ? ub64(blob.salt) : crypto.getRandomValues(new Uint8Array(16));
+    cryptoKey = await aesKey(pw, encSalt);
+    S = blankState();
+    if (blob && blob.ct) {
+      try {
+        const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: ub64(blob.iv) }, cryptoKey, ub64(blob.ct));
+        const s = JSON.parse(td.decode(pt)); if (s && s.v === 1) S = Object.assign(blankState(), s);
+      } catch (e) { alert('저장된 자료를 풀지 못했습니다. 작업 파일(백업)로 복구하세요.'); }
+    } else {
+      // 이전 버전(암호화 전) 자료가 있으면 옮긴 뒤 평문 삭제
+      try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.v === 1) { S = Object.assign(blankState(), s); await writeEnc(); } } catch (e) { }
+      localStorage.removeItem(KEY);
+    }
+    return true;
+  }
+  async function writeEnc() {
+    if (!cryptoKey) return;
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, te.encode(JSON.stringify(S)));
+    localStorage.setItem(KEY_ENC, JSON.stringify({ v: 1, salt: b64(encSalt), iv: b64(iv), ct: b64(ct) }));
   }
   let saveTimer = null;
   function save() {
     S.updated = new Date().toISOString();
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('브라우저 저장소에 저장하지 못했습니다. [작업 파일 저장]으로 백업하세요.'); } }, 150);
+    saveTimer = setTimeout(() => { writeEnc().catch(() => toast('브라우저 저장소에 저장하지 못했습니다. [작업 파일 저장]으로 백업하세요.')); }, 150);
   }
+  function lockNow(msg) {
+    clearTimeout(saveTimer); if (cryptoKey) writeEnc().catch(() => { });
+    cryptoKey = null; S = blankState();
+    $('#main').innerHTML = ''; $('#side').innerHTML = ''; $('#preview') && ($('#preview').innerHTML = '');
+    showLock(msg);
+  }
+  function showLock(msg) {
+    $('#app').style.display = 'none';
+    try { $('#dlg').open && $('#dlg').close(); } catch (e) { }
+    let L = $('#lock');
+    if (!L) { L = document.createElement('div'); L.id = 'lock'; document.body.appendChild(L); }
+    const ok = window.isSecureContext && window.crypto && crypto.subtle;
+    L.innerHTML = `<div style="position:fixed;inset:0;background:#14233b;display:grid;place-items:center;z-index:50">
+      <form id="lockForm" style="background:#fff;border-radius:12px;padding:28px 30px;width:min(380px,92vw);box-shadow:0 20px 50px rgba(0,0,0,.35)">
+        <h2 style="margin:0 0 4px;font-size:18px">교사 다면평가·근무성적평정 프로그램</h2>
+        <p class="note" style="margin:0 0 16px">인사 자료 보호를 위해 비밀번호를 입력하세요.</p>
+        ${ok ? `<input type="password" id="lockPw" autocomplete="current-password" placeholder="비밀번호" style="width:100%;padding:9px 10px;font-size:15px">
+        <div id="lockMsg" style="min-height:20px;margin:8px 0;font-size:13px;color:#b42318">${esc(msg || '')}</div>
+        <button class="btn pri" style="width:100%;justify-content:center;padding:9px" id="lockBtn">열기</button>
+        <p class="note" style="margin:14px 0 0;font-size:12px">입력한 자료는 이 비밀번호로 암호화되어 이 PC 브라우저에만 저장됩니다. ${IDLE_MIN}분 동안 사용하지 않으면 자동으로 잠깁니다.</p>`
+        : `<div class="msg err">이 브라우저에서는 암호화 기능(Web Crypto)을 쓸 수 없습니다. 최신 크롬 또는 엣지로 파일을 열어 주세요.</div>`}
+      </form></div>`;
+    L.style.display = '';
+    const f = $('#lockForm');
+    f.onsubmit = async ev => {
+      ev.preventDefault(); const pw = $('#lockPw').value; const btn = $('#lockBtn');
+      btn.disabled = true; btn.textContent = '확인 중…';
+      let good = false; try { good = await unlock(pw); } catch (e) { console.error(e); }
+      if (!good) { btn.disabled = false; btn.textContent = '열기'; $('#lockMsg').textContent = '비밀번호가 맞지 않습니다.'; $('#lockPw').select(); return; }
+      L.style.display = 'none'; L.innerHTML = ''; $('#app').style.display = ''; render(); bumpIdle();
+    };
+    setTimeout(() => $('#lockPw') && $('#lockPw').focus(), 0);
+  }
+  let idleTimer = null;
+  function bumpIdle() { clearTimeout(idleTimer); if (cryptoKey) idleTimer = setTimeout(() => lockNow(`${IDLE_MIN}분 동안 사용하지 않아 잠겼습니다.`), IDLE_MIN * 60000); }
+  ['mousedown', 'keydown', 'wheel', 'touchstart'].forEach(t => document.addEventListener(t, bumpIdle, { passive: true }));
+
   function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2600); }
   function download(name, text, type = 'application/json') {
     const b = new Blob([text], { type: type + ';charset=utf-8' });
@@ -654,6 +732,7 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
       <div class="foot">
         <button data-act="backup">⬇ 작업 파일 저장(백업)</button>
         <button data-act="restore">⬆ 작업 파일 불러오기</button>
+        <button data-act="lock">🔒 지금 잠그기</button>
         <div style="margin-top:8px">자료는 이 PC의 브라우저에만 저장되며 외부로 전송되지 않습니다.${S.updated ? `<br>마지막 저장: ${new Date(S.updated).toLocaleString('ko-KR')}` : ''}</div>
       </div>`;
   }
@@ -689,7 +768,7 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
       </ol></div>
     <div class="grid2">
       <div class="card"><h3>자료 보관</h3>
-        <p class="note" style="margin-top:0">입력 내용은 이 PC 브라우저에 자동 저장됩니다. 다른 PC로 옮기거나 단계별로 보관하려면 <b>작업 파일 저장</b>으로 백업 파일(.json)을 만드세요. 인사 자료이므로 공용 PC에서는 작업 후 <b>모든 자료 지우기</b>를 하세요.</p>
+        <p class="note" style="margin-top:0">입력 내용은 접속 비밀번호로 암호화(AES-256)되어 이 PC 브라우저에 자동 저장됩니다. 다른 PC로 옮기거나 단계별로 보관하려면 <b>작업 파일 저장</b>으로 백업 파일(.json)을 만드세요. 인사 자료이므로 공용 PC에서는 작업 후 <b>모든 자료 지우기</b>를 하세요.</p>
         <div class="row"><button class="btn pri" data-act="backup">⬇ 작업 파일 저장</button><button class="btn" data-act="restore">⬆ 작업 파일 불러오기</button><span class="spacer"></span><button class="btn danger" data-act="wipe">모든 자료 지우기</button></div>
       </div>
       <div class="card"><h3>연습해 보기</h3>
@@ -1321,7 +1400,8 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
     const a = ds.act;
     if (a === 'backup') { download(`다면평가_작업파일_${S.info.school || '학교'}_${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(S, null, 1)); toast('작업 파일을 저장했습니다.'); }
     else if (a === 'restore') pickFiles('.json,application/json', false, fs => { try { const d = JSON.parse(fs[0].text); if (d.v !== 1 || !Array.isArray(d.people)) throw 0; if (!confirm('현재 자료를 불러온 작업 파일로 바꿀까요?')) return; S = Object.assign(blankState(), d); save(); render(); toast('작업 파일을 불러왔습니다.'); } catch (e) { alert('작업 파일 형식이 아닙니다. (평가자 결과 파일은 [정성평가] 단계에서 불러오세요.)'); } });
-    else if (a === 'wipe') { if (confirm('이 PC 브라우저에 저장된 모든 자료를 지웁니다. 계속할까요?')) { localStorage.removeItem(KEY); S = blankState(); render(); } }
+    else if (a === 'wipe') { if (confirm('이 PC 브라우저에 저장된 모든 자료를 지웁니다. 계속할까요?')) { clearTimeout(saveTimer); localStorage.removeItem(KEY); localStorage.removeItem(KEY_ENC); cryptoKey = null; lockNow('모든 자료를 지웠습니다.'); } }
+    else if (a === 'lock') lockNow('잠겼습니다.');
     else if (a === 'sample35') { if (confirm('연습 자료를 불러오면 현재 자료가 바뀝니다. 계속할까요?')) { S = sample35(3); save(); go('roster'); toast('연습 자료(교원 35명)를 불러왔습니다.'); } }
     else if (a === 'addRow') { S.people.push({ id: uid(), name: '', birth: '', kind: '교사', target: true, evaluator: false, discipline: '', note: '' }); save(); render(); setTimeout(() => { const ins = $$('input[data-k="name"]'); ins[ins.length - 1]?.focus(); }, 0); }
     else if (a === 'pasteRoster') showDialog('엑셀에서 붙여넣기', `<p class="note" style="margin-top:0">엑셀의 [성명, 생년월일, (다면평가자 여부: ○ 또는 Y)] 열을 복사해 붙여넣으세요. 한 줄에 한 명입니다.</p><textarea id="pasteBox" rows="12" style="width:100%" placeholder="김민준	650101	○&#10;이서연	700315"></textarea><label class="row note" style="margin-top:6px"><input type="checkbox" id="pasteReplace"> 기존 명단을 지우고 바꾸기</label>`, `<button class="btn" data-dlgclose>취소</button><button class="btn pri" data-act="pasteDo">추가</button>`);
@@ -1426,9 +1506,9 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
   window.addEventListener('beforeprint', () => { if (step === 'print' && ui.printSel.length) $('#preview').innerHTML = buildDocs(ui.printSel); });
 
   // 다른 탭에서 바뀐 경우 반영
-  window.addEventListener('storage', e => { if (e.key === KEY) { S = load(); render(); } });
+  window.addEventListener('storage', e => { if (e.key === KEY_ENC && cryptoKey) lockNow('다른 창에서 자료가 바뀌어 잠갔습니다. 다시 열어 주세요.'); });
 
-  render();
+  showLock();
 })();
 
 </script>
