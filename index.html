@@ -733,6 +733,8 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
         <button data-act="backup">⬇ 작업 파일 저장(백업)</button>
         <button data-act="restore">⬆ 작업 파일 불러오기</button>
         <button data-act="lock">🔒 지금 잠그기</button>
+        <button data-act="delSample">🗑 연습 자료 삭제</button>
+        <button data-act="wipe" style="color:#ffb4ab">⚠ 시스템 초기화</button>
         <div style="margin-top:8px">자료는 이 PC의 브라우저에만 저장되며 외부로 전송되지 않습니다.${S.updated ? `<br>마지막 저장: ${new Date(S.updated).toLocaleString('ko-KR')}` : ''}</div>
       </div>`;
   }
@@ -742,7 +744,8 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
     if (!isRegular() && step === 'gp') step = 'result';
     renderSide();
     const fn = { home: vHome, info: vInfo, roster: vRoster, criteria: vCriteria, qual: vQual, quant: vQuant, result: vResult, gp: vGp, print: vPrint }[step] || vHome;
-    $('#main').innerHTML = fn();
+    const isSample = S.sample || S.people.some(p => /^s[xy]\d/.test(p.id));
+    $('#main').innerHTML = (isSample ? `<div class="msg warn row" style="margin:0 0 14px"><b>연습 자료를 사용 중입니다.</b><span>실제 평가 전에 연습 자료를 삭제하세요.</span><span class="spacer"></span><button class="btn sm danger" data-act="delSample">연습 자료 삭제</button></div>` : '') + fn();
     after[step] && after[step]();
   }
   const after = {};
@@ -754,7 +757,6 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
   function vHome() {
     return `<h2>시작하기</h2>
     <p class="lead">「2025학년도 교사 다면평가 계획(시행)」과 교육지원청 제공 엑셀 프로그램(2025학년도 초등학교 다면평가프로그램(최종))의 절차·계산 방식을 그대로 따릅니다.</p>
-    ${S.people.some(p => /^sx\d$/.test(p.id)) ? `<div class="msg warn">이전 버전의 ‘교사 10명 연습 자료’가 이 브라우저에 저장되어 있습니다. 아래 <b>[연습 자료 불러오기(교원 35명)]</b>를 누르면 35명 자료로 바뀝니다.</div>` : ''}
     <div class="card"><h3>작업 순서 <small>왼쪽 메뉴를 위에서부터 차례로 진행합니다</small></h3>
       <ol class="steps">
         <li><b>기본 정보</b> — 학교명, 평가기간, 평정자(교감)·확인자(교장)·조정자 직위와 성명</li>
@@ -768,8 +770,10 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
       </ol></div>
     <div class="grid2">
       <div class="card"><h3>자료 보관</h3>
-        <p class="note" style="margin-top:0">입력 내용은 접속 비밀번호로 암호화(AES-256)되어 이 PC 브라우저에 자동 저장됩니다. 다른 PC로 옮기거나 단계별로 보관하려면 <b>작업 파일 저장</b>으로 백업 파일(.json)을 만드세요. 인사 자료이므로 공용 PC에서는 작업 후 <b>모든 자료 지우기</b>를 하세요.</p>
-        <div class="row"><button class="btn pri" data-act="backup">⬇ 작업 파일 저장</button><button class="btn" data-act="restore">⬆ 작업 파일 불러오기</button><span class="spacer"></span><button class="btn danger" data-act="wipe">모든 자료 지우기</button></div>
+        <p class="note" style="margin-top:0">입력 내용은 접속 비밀번호로 암호화(AES-256)되어 이 PC 브라우저에 자동 저장됩니다. 다른 PC로 옮기거나 단계별로 보관하려면 <b>작업 파일 저장</b>으로 백업 파일(.json)을 만드세요. 인사 자료이므로 공용 PC에서는 작업 후 <b>시스템 초기화</b>를 하세요.</p>
+        <div class="row"><button class="btn pri" data-act="backup">⬇ 작업 파일 저장</button><button class="btn" data-act="restore">⬆ 작업 파일 불러오기</button></div>
+        <div class="row" style="margin-top:10px;border-top:1px solid var(--line2);padding-top:10px"><button class="btn danger" data-act="delSample">연습 자료 삭제</button><button class="btn danger" data-act="wipe">시스템 초기화</button></div>
+        <p class="note" style="margin:6px 0 0"><b>연습 자료 삭제</b>: 불러온 연습 자료만 지우고 빈 상태로 시작합니다. <b>시스템 초기화</b>: 이 PC 브라우저에 저장된 모든 평가 자료(입력 내용·화면 설정)를 지우고 잠급니다. 프로그램 파일과 이미 저장한 백업 파일은 지워지지 않습니다.</p>
       </div>
       <div class="card"><h3>연습해 보기</h3>
         <p class="note" style="margin-top:0">가상의 연습 자료를 불러옵니다. 현재 입력된 자료는 바뀌므로 먼저 백업하세요.</p>
@@ -1132,7 +1136,10 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
     g.push({ grp: `개인성과급용(정성 ${S.perfRate.qual} · 정량 ${S.perfRate.quant})`, items: [
       { id: 'perf:form5p1', t: `정성 교사 다면평가표 (${S.perfRate.qual})`, s: '' },
       { id: 'perf:form5p3', t: `정량 교사 다면평가표 (${S.perfRate.quant})`, s: '' },
-      { id: 'perf:form5p5', t: `교사 다면평가 합산표 (100점)`, s: '' }] });
+      { id: 'perf:form5p5', t: `교사 다면평가 합산표 (100점)`, s: '' },
+      { id: 'perfsort:form5p1', t: `정성 교사 다면평가표 (${S.perfRate.qual}) — 순위 정렬`, s: '성과급 다면평가 총점 순' },
+      { id: 'perfsort:form5p3', t: `정량 교사 다면평가표 (${S.perfRate.quant}) — 순위 정렬`, s: '성과급 다면평가 총점 순' },
+      { id: 'perfsort:form5p5', t: `교사 다면평가 합산표 (100점) — 순위 정렬`, s: '성과급 다면평가 총점 순' }] });
     if (reg) g.push({ grp: '내부 확인용(제출하지 않음)', items: [{ id: 'check:form6', t: '합산 점검표(조정점·순위·등급 참고값 표시)', s: '분포 일치 확인' }] });
     return g;
   };
@@ -1174,9 +1181,11 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
         if (id.startsWith('form11:')) return docForm11(Cp, +id.slice(7));
         if (id === 'form21') return docForm21(Cp);
         const [pre, f] = id.includes(':') ? id.split(':') : ['int', id];
-        const C = pre === 'perf' ? Cf : Cp;
-        const list = pre === 'sub' ? order : C.list;
-        const opt = { blank: pre === 'sub', sorted: pre === 'sub', perf: pre === 'perf', check: pre === 'check' };
+        const isPerf = pre === 'perf' || pre === 'perfsort';
+        const C = isPerf ? Cf : Cp;
+        const perfOrder = Cf.list.slice().sort((a, b) => (a.dmTotalRank ?? 999) - (b.dmTotalRank ?? 999) || a.idx - b.idx);
+        const list = pre === 'sub' ? order : pre === 'perfsort' ? perfOrder : C.list;
+        const opt = { blank: pre === 'sub', sorted: pre === 'sub' || pre === 'perfsort', perf: isPerf, check: pre === 'check' };
         if (f === 'form5p1') return docForm5p1(C, list, opt);
         if (f === 'form5p3') return docForm5p3(C, list, opt);
         if (f === 'form5p5') return docForm5p5(C, list, opt);
@@ -1264,7 +1273,7 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
   }
   function docForm21(C) {
     const Es = C.E;
-    const pages = chunk(C.list, 32);
+    const pages = chunk(C.list, 26);
     return pages.map((pg, pi) => `<div class="page"><p class="flabel">[서식 2-1] 학교보관</p><h1 style="font-size:13pt">정량(定量)평가 방법에 따른 교사 다면평가 집계표</h1>
       ${pi === 0 ? `<div style="columns:2;font-size:9.5pt;margin:2mm 0 3mm">${Es.map(e => `<div style="margin:1mm 0">∘ 다면평가자 성명: ${esc(e.name)} (인)</div>`).join('')}</div>` : ''}
       <table><thead><tr><th colspan="2">평가대상자</th><th colspan="4">평가사항: 근무실적 및 근무수행능력</th><th rowspan="2">평가점<br>(총점)<br>(100)</th></tr>
@@ -1273,16 +1282,20 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
       ${pi === pages.length - 1 ? `<div class="sig"><span>다면평가관리위원회 위원장 귀하</span></div>` : ''}</div>`).join('');
   }
   const rateOf = (C, which) => which === 'qual' ? C.R.qual : C.R.quant;
-  const titleSuffix = opt => opt.perf ? ' <span style="font-size:10pt">(개인성과급용)</span>' : '';
+  const titleSuffix = opt => opt.perf ? ` <span style="font-size:10pt">(개인성과급용${opt.sorted ? '·순위 정렬' : ''})</span>` : '';
+  // 순위 열: 승진용은 ⑨합산 순위, 성과급용은 성과급 다면평가 총점 순위(동점은 같은 순위)
+  const showRk = opt => opt.perf || (!opt.sorted && !opt.check);
+  const rkOf = (o, opt) => (opt.perf ? o.dmTotalRank : o.totalRank) ?? '';
+  const rkTitle = opt => opt.perf ? '순위<br><span style="font-weight:400;font-size:7pt">(성과급)</span>' : '순위';
   function docForm5p1(C, list, opt) {
     const r = rateOf(C, 'qual');
     const pages = chunk(list, 26);
     return pages.map((pg, pi) => `<div class="page"><p class="flabel">[서식 5] (제28조의3제1항 관련)\n■ 교육공무원 승진규정 [별지 제4호의2서식] &lt;개정 2016. 12. 30.&gt;</p><span class="fpage">(제1쪽)</span>
       <h1>정성(定性)평가 방법에 따른 교사 다면평가표${titleSuffix(opt)}</h1>${hdr3(opt.blank)}
-      <table class="tight"><thead><tr><th colspan="3" rowspan="2">평가사항<br>평가요소</th><th>태도</th><th colspan="4">근무실적 및 근무수행능력</th><th rowspan="3">⑨<br>평가점</th><th rowspan="3">⑩<br>환산점</th>${opt.sorted || opt.check ? '' : '<th rowspan="3">순위</th>'}</tr>
+      <table class="tight"><thead><tr><th colspan="3" rowspan="2">평가사항<br>평가요소</th><th>태도</th><th colspan="4">근무실적 및 근무수행능력</th><th rowspan="3">⑨<br>평가점</th><th rowspan="3">⑩<br>환산점</th>${showRk(opt) ? `<th rowspan="3">${rkTitle(opt)}</th>` : ''}</tr>
       <tr><th rowspan="2">④ 교육<br>공무원으로서의<br>태도(10점)</th><th rowspan="2">⑤ 학습<br>지도<br>(40점)</th><th rowspan="2">⑥ 생활<br>지도<br>(30점)</th><th rowspan="2">⑦ 전문성<br>개발<br>(5점)</th><th rowspan="2">⑧ 담당<br>업무<br>(15점)</th></tr>
       <tr><th>평가대상자<br>소속</th><th>평가대상자<br>성명</th><th></th></tr></thead><tbody>
-      ${pg.map(o => `<tr><td>${school()}</td><td>${esc(o.name)}</td><td>다면평가자</td>${o.qualEl.map(v => `<td>${f2(v)}</td>`).join('')}<td>${f2(o.qualTotal)}</td><td>${f2(o.qualConv)}</td>${opt.sorted || opt.check ? '' : `<td>${o.totalRank ?? ''}</td>`}</tr>`).join('')}</tbody></table>
+      ${pg.map(o => `<tr><td>${school()}</td><td>${esc(o.name)}</td><td>다면평가자</td>${o.qualEl.map(v => `<td>${f2(v)}</td>`).join('')}<td>${f2(o.qualTotal)}</td><td>${f2(o.qualConv)}</td>${showRk(opt) ? `<td>${rkOf(o, opt)}</td>` : ''}</tr>`).join('')}</tbody></table>
       ${pi === pages.length - 1 ? `<div class="remark">비고
   1. 환산점 = 평가점 × ${r}/100
   2. 다면평가자는 다음 각 목의 분포비율에 맞도록 평가해야 하며, 평가점은 특별한 사정이 없으면 동점을 주지 않도록 해야 한다. 다만, 라목의 평정점에 해당하는 사람이 없거나 라목의 평정점에 해당하는 사람의 비율이 10퍼센트 이하일 때에는 라목의 비율을 적용하지 않고 다목에 가산할 수 있다.
@@ -1294,22 +1307,22 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
     const pages = chunk(list, 26);
     return pages.map((pg, pi) => `<div class="page"><p class="flabel">[서식 5] (제28조의3제1항 관련)\n■ 교육공무원 승진규정 [별지 제4호의2서식]</p><span class="fpage">(제3쪽)</span>
       <h1>정량(定量)평가 방법에 따른 교사 다면평가표${titleSuffix(opt)}</h1>${hdr3(opt.blank)}
-      <table class="tight"><thead><tr><th colspan="3" rowspan="2">평가사항<br>평가요소</th><th colspan="4">근무실적 및 근무수행능력</th><th rowspan="3">⑧<br>평가점</th><th rowspan="3">⑨<br>환산점</th>${opt.sorted ? '' : '<th rowspan="3">순위</th>'}</tr>
+      <table class="tight"><thead><tr><th colspan="3" rowspan="2">평가사항<br>평가요소</th><th colspan="4">근무실적 및 근무수행능력</th><th rowspan="3">⑧<br>평가점</th><th rowspan="3">⑨<br>환산점</th>${showRk(opt) ? `<th rowspan="3">${rkTitle(opt)}</th>` : ''}</tr>
       <tr><th rowspan="2">④ 학습지도<br>(30점)</th><th rowspan="2">⑤ 생활지도<br>(30점)</th><th rowspan="2">⑥ 전문성개발<br>(10점)</th><th rowspan="2">⑦ 담당업무<br>(30점)</th></tr>
       <tr><th>평가대상자<br>소속</th><th>평가대상자<br>성명</th><th></th></tr></thead><tbody>
-      ${pg.map(o => `<tr><td>${school()}</td><td>${esc(o.name)}</td><td>다면평가자</td>${o.quantEl.map(v => `<td>${fnum(v)}</td>`).join('')}<td>${fnum(o.quantTotal)}</td><td>${f2(o.quantConv)}</td>${opt.sorted ? '' : `<td>${o.totalRank ?? ''}</td>`}</tr>`).join('')}</tbody></table>
+      ${pg.map(o => `<tr><td>${school()}</td><td>${esc(o.name)}</td><td>다면평가자</td>${o.quantEl.map(v => `<td>${fnum(v)}</td>`).join('')}<td>${fnum(o.quantTotal)}</td><td>${f2(o.quantConv)}</td>${showRk(opt) ? `<td>${rkOf(o, opt)}</td>` : ''}</tr>`).join('')}</tbody></table>
       ${pi === pages.length - 1 ? `<div class="remark">비고
   1. 환산점 = 평가점 × ${r}/100
   2. 근무성적의 평정자 및 확인자가 서명날인한다.</div>${A4}` : ''}</div>`).join('');
   }
   function docForm5p5(C, list, opt) {
-    const pages = chunk(list, 30);
+    const pages = chunk(list, 25);
     return pages.map((pg, pi) => `<div class="page"><p class="flabel">[서식 5] (제28조의3제1항 관련)\n■ 교육공무원 승진규정 [별지 제4호의2서식]</p><span class="fpage">(제5쪽)</span>
       <h1>교사 다면평가 합산표${titleSuffix(opt)}</h1>${hdr3(opt.blank)}
       <p class="sub" style="text-align:right">적용 환산점 백분율: 정성 ${C.R.qual} · 정량 ${C.R.quant}</p>
-      <table><thead><tr>${opt.sorted ? '' : '<th rowspan="2" style="width:8%">순위</th>'}<th rowspan="2">평가 대상자<br>소속</th><th rowspan="2">평가 대상자<br>성명</th><th colspan="2">④ 환산점</th><th rowspan="2">⑤ 총점</th></tr>
+      <table><thead><tr>${showRk(opt) ? `<th rowspan="2" style="width:8%">${rkTitle(opt)}</th>` : ''}<th rowspan="2">평가 대상자<br>소속</th><th rowspan="2">평가 대상자<br>성명</th><th colspan="2">④ 환산점</th><th rowspan="2">⑤ 총점</th></tr>
       <tr><th>정성평가</th><th>정량평가</th></tr></thead><tbody>
-      ${pg.map(o => `<tr>${opt.sorted ? '' : `<td>${o.totalRank ?? ''}</td>`}<td>${school()}</td><td>${esc(o.name)}</td><td>${f2(o.qualConv)}</td><td>${f2(o.quantConv)}</td><td>${f2(o.dmTotal)}</td></tr>`).join('')}</tbody></table>
+      ${pg.map(o => `<tr>${showRk(opt) ? `<td>${rkOf(o, opt)}</td>` : ''}<td>${school()}</td><td>${esc(o.name)}</td><td>${f2(o.qualConv)}</td><td>${f2(o.quantConv)}</td><td>${f2(o.dmTotal)}</td></tr>`).join('')}</tbody></table>
       ${pi === pages.length - 1 ? A4 : ''}</div>`).join('');
   }
   function docForm4(C, list, opt) {
@@ -1351,9 +1364,9 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
     const kinds={8:'보건교사',17:'영양교사',26:'특수교사',31:'전문상담교사'};
     const evIdx=[2,7,12,16,21,27,33];
     const lat=names.map(()=>rnd());
-    const s=blankState(); Object.assign(s.info,{school:'한빛초등학교',vpName:'김교감',prName:'이교장',dirName:'박과장'});
+    const s=blankState(); s.sample=true; Object.assign(s.info,{school:'한빛초등학교',vpName:'김교감',prName:'이교장',dirName:'박과장'});
     names.forEach((n,i)=>{const id='sy'+String(i).padStart(2,'0');
-      s.people.push({id,name:n,birth:String(650101+Math.floor(rnd()*300000)).slice(0,6),kind:kinds[i]||'교사',target:true,evaluator:evIdx.includes(i),discipline:'',note:''});
+      s.people.push({id,name:n,birth:(v=>String(65+Math.floor(v/336))+String(1+Math.floor(v%336/28)).padStart(2,'0')+String(1+v%28).padStart(2,'0'))(Math.floor(rnd()*35*336)),kind:kinds[i]||'교사',target:true,evaluator:evIdx.includes(i),discipline:'',note:''});
       const q=lat[i]; const sec=[30,30,10,30].map(m=>Math.max(Math.round(m*0.7),Math.min(m,Math.round(m*(0.8+0.2*q)+(rnd()*2-1)*m/30*1.5))));
       s.quant[id]=sec;});
     const ids=s.people.map(p=>p.id);
@@ -1400,7 +1413,21 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
     const a = ds.act;
     if (a === 'backup') { download(`다면평가_작업파일_${S.info.school || '학교'}_${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(S, null, 1)); toast('작업 파일을 저장했습니다.'); }
     else if (a === 'restore') pickFiles('.json,application/json', false, fs => { try { const d = JSON.parse(fs[0].text); if (d.v !== 1 || !Array.isArray(d.people)) throw 0; if (!confirm('현재 자료를 불러온 작업 파일로 바꿀까요?')) return; S = Object.assign(blankState(), d); save(); render(); toast('작업 파일을 불러왔습니다.'); } catch (e) { alert('작업 파일 형식이 아닙니다. (평가자 결과 파일은 [정성평가] 단계에서 불러오세요.)'); } });
-    else if (a === 'wipe') { if (confirm('이 PC 브라우저에 저장된 모든 자료를 지웁니다. 계속할까요?')) { clearTimeout(saveTimer); localStorage.removeItem(KEY); localStorage.removeItem(KEY_ENC); cryptoKey = null; lockNow('모든 자료를 지웠습니다.'); } }
+    else if (a === 'wipe') {
+      const v = prompt('시스템 초기화: 이 PC 브라우저에 저장된 모든 평가 자료를 지우고 되돌릴 수 없습니다.\n먼저 [작업 파일 저장]으로 백업했는지 확인하세요.\n\n계속하려면 「초기화」를 입력하세요.');
+      if (v === null) return;
+      if (v.trim() !== '초기화') return toast('「초기화」를 정확히 입력해야 초기화됩니다.');
+      clearTimeout(saveTimer); localStorage.removeItem(KEY); localStorage.removeItem(KEY_ENC);
+      ['dm-step', 'dm-gpsort'].forEach(k => sessionStorage.removeItem(k)); step = 'home';
+      ui = { qualOpen: null, printSel: null, printMode: null, gpOpen: {}, gpSort: 'input' };
+      cryptoKey = null; lockNow('시스템을 초기화했습니다. 비밀번호를 입력하면 빈 상태로 시작합니다.');
+    }
+    else if (a === 'delSample') {
+      const isSample = S.sample || S.people.some(p => /^s[xy]\d/.test(p.id));
+      if (!isSample) return toast('지금 자료는 연습 자료가 아닙니다. 모든 자료를 지우려면 [시스템 초기화]를 쓰세요.');
+      if (!confirm('연습 자료를 모두 지우고 빈 상태로 시작할까요?')) return;
+      S = blankState(); ui.undoGp = null; ui.printSel = []; ui.gpOpen = {}; save(); go('home'); toast('연습 자료를 삭제했습니다.');
+    }
     else if (a === 'lock') lockNow('잠겼습니다.');
     else if (a === 'sample35') { if (confirm('연습 자료를 불러오면 현재 자료가 바뀝니다. 계속할까요?')) { S = sample35(3); save(); go('roster'); toast('연습 자료(교원 35명)를 불러왔습니다.'); } }
     else if (a === 'addRow') { S.people.push({ id: uid(), name: '', birth: '', kind: '교사', target: true, evaluator: false, discipline: '', note: '' }); save(); render(); setTimeout(() => { const ins = $$('input[data-k="name"]'); ins[ins.length - 1]?.focus(); }, 0); }
