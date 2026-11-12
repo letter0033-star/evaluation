@@ -828,6 +828,10 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
       if (isRegular() && p.kind === '기간제교사' && p.target) warns.push(`${p.name}: 기간제교사는 근무성적평정 대상이 아닙니다. 평가 구분을 ‘계약제 교원’으로 한 별도 작업 파일에서 평가하세요.`);
       if (!isRegular() && p.discipline) warns.push(`${p.name}: 징계 표시는 근무성적평정에서만 점검됩니다.`);
     });
+    const cm = S.people.filter(p => p.name && p.committee);
+    if (cm.length && (cm.length < 3 || cm.length > 7)) warns.push(`다면평가관리위원회 위원(동료교사)은 3명 이상 7명 이하로 구성합니다(현재 ${cm.length}명, 위원장은 평정자).`);
+    if (cm.length && !cm.some(p => /보건|영양|사서|전문상담/.test(p.kind))) warns.push('다면평가관리위원회 구성 시 보건·영양·사서·전문상담교사 등 1명 이상 참여를 권장합니다.');
+    cm.filter(p => p.kind === '기간제교사').forEach(p => warns.push(`${p.name}: 관리위원회 위원은 동료교사(정규)로 구성하는 것이 원칙입니다.`));
     const nT = T().length, nE = E().length;
     if (nT && nE < DM.minEvaluators(nT)) errors.push(`평가대상자 ${nT}명 → 다면평가자 ${DM.minEvaluators(nT)}명 이상 필요(현재 ${nE}명)`);
     if (nT > 100) errors.push('평가대상자는 100명까지 처리할 수 있습니다.');
@@ -846,11 +850,12 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
       <div class="row" style="margin-bottom:10px">
         <span class="pill ${nT ? 'ok' : 'mute'}">평가대상자 ${nT}명</span>
         <span class="pill ${nT && nE >= DM.minEvaluators(nT) ? 'ok' : 'err'}">다면평가자 ${nE}명 / 최소 ${nT ? DM.minEvaluators(nT) : '-'}명</span>
+        <span class="pill ${(() => { const c = S.people.filter(p => p.name && p.committee).length; return c >= 3 && c <= 7 ? 'ok' : c ? 'warn' : 'mute'; })()}">관리위원회 위원 ${S.people.filter(p => p.name && p.committee).length}명 (3~7명)</span>
         <span class="spacer"></span>
         <button class="btn" data-act="pasteRoster">엑셀에서 붙여넣기</button>
         <button class="btn" data-act="addRow">＋ 행 추가</button>
       </div>
-      <div class="tbl-wrap"><table class="t"><thead><tr><th style="width:44px">연번</th><th>성명</th><th style="width:110px">생년월일</th><th style="width:130px">구분</th><th style="width:80px">평가대상</th><th style="width:90px">다면평가자</th><th style="width:150px">징계 등<br><span class="mini">(근평 제한 점검)</span></th><th>비고</th><th style="width:96px"></th></tr></thead>
+      <div class="tbl-wrap"><table class="t"><thead><tr><th style="width:44px">연번</th><th>성명</th><th style="width:110px">생년월일</th><th style="width:130px">구분</th><th style="width:80px">평가대상</th><th style="width:90px">다면평가자</th><th style="width:90px">관리위원회<br><span class="mini">위원</span></th><th style="width:150px">징계 등<br><span class="mini">(근평 제한 점검)</span></th><th>비고</th><th style="width:96px"></th></tr></thead>
       <tbody>${P.map((p, k) => `<tr>
         <td>${k + 1}</td>
         <td><input data-p="${p.id}" data-k="name" value="${esc(p.name)}" style="width:100%"></td>
@@ -858,10 +863,11 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
         <td><select data-p="${p.id}" data-k="kind">${KINDS.map(v => `<option ${p.kind === v ? 'selected' : ''}>${v}</option>`).join('')}</select></td>
         <td><input type="checkbox" data-p="${p.id}" data-k="target" ${p.target ? 'checked' : ''}></td>
         <td><input type="checkbox" data-p="${p.id}" data-k="evaluator" ${p.evaluator ? 'checked' : ''}></td>
-        <td><select data-p="${p.id}" data-k="discipline"><option value="">없음</option><option value="불문경고" ${p.discipline === '불문경고' ? 'selected' : ''}>불문경고(‘수’ 불가)</option><option value="징계" ${p.discipline === '징계' ? 'selected' : ''}>징계 견책 이상(‘우’ 이상 불가)</option></select></td>
+        <td><input type="checkbox" data-p="${p.id}" data-k="committee" ${p.committee ? 'checked' : ''}></td>
+        <td><select data-p="${p.id}" data-k="discipline"><option value="">없음</option><option value="불문경고" ${p.discipline === '불문경고' ? 'selected' : ''}>불문경고(‘수’ 불가)</option><option value="징계" ${p.discipline === '징계' ? 'selected' : ''}>징계 견책 이상(‘우’ 이상 불가)</option><option value="행정처분" ${p.discipline === '행정처분' ? 'selected' : ''}>행정경고·주의(감점 대상)</option></select></td>
         <td><input data-p="${p.id}" data-k="note" value="${esc(p.note)}" style="width:100%"></td>
         <td><button class="btn sm" data-mv="${p.id}" data-d="-1" title="위로">▲</button><button class="btn sm" data-mv="${p.id}" data-d="1" title="아래로">▼</button><button class="btn sm danger" data-del="${p.id}" title="삭제">✕</button></td>
-      </tr>`).join('') || `<tr><td colspan="9" class="note" style="padding:20px">‘＋ 행 추가’ 또는 ‘엑셀에서 붙여넣기’로 명단을 입력하세요.</td></tr>`}</tbody></table></div>
+      </tr>`).join('') || `<tr><td colspan="10" class="note" style="padding:20px">‘＋ 행 추가’ 또는 ‘엑셀에서 붙여넣기’로 명단을 입력하세요.</td></tr>`}</tbody></table></div>
       ${errors.length ? `<div class="msg err"><b>확인 필요</b><ul>${errors.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div>` : ''}
       ${warns.length ? `<div class="msg warn"><ul style="margin:0 0 0 18px">${warns.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div>` : ''}
     </div>
@@ -1046,6 +1052,7 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
       </div>
       ${ch.errors.length ? `<div class="msg err"><ul style="margin:0 0 0 18px">${ch.errors.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ch.done ? '<div class="msg ok"><b>모든 점검 통과</b> — ⑦총점 기준과 ⑧조정점 기준 등급이 일치하고, 평정자·확인자 분포와 동점 여부에 문제가 없습니다. [출력] 단계로 가세요.</div>' : ''}
       ${ch.warns.length ? `<div class="msg warn"><ul style="margin:0 0 0 18px">${ch.warns.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}
+      ${C.list.some(o => o.person.discipline === '행정처분') ? `<div class="msg info">행정처분(경고·주의) 대상: ${esc(C.list.filter(o => o.person.discipline === '행정처분').map(o => o.name).join(', '))} — 감점은 최종 조정점 부여 후 적용하며 순위는 변동 없음(주의 1회 감점 없음, 주의 2회 0.5점, 경고 1회 1점, 주의 1회+경고 1회 1.25점). 제출 서류에 반드시 표기하세요(근무성적평정 계획 Ⅰ-7).</div>` : ''}
       <div class="row"><button class="btn pri" data-act="autoAdj">⚙ 평정분포 자동 맞추기(수동조정 자동 계산)</button>${ui.undoGp ? '<button class="btn" data-act="undoAuto">자동 맞추기 되돌리기</button>' : ''}<button class="btn" data-act="seedRanks">다면평가 순위로 교감·교장 순위 채우기</button><button class="btn" data-act="clearRanks">순위 모두 지우기</button><span class="spacer"></span><span class="note">순위만으로 맞지 않으면 ‘수동조정’에서 요소별 점수를 고칩니다(매뉴얼 5. 수동조정).</span></div>
     </div>
     <div class="card"><div class="row" style="margin-bottom:8px"><b>정렬</b>
@@ -1118,6 +1125,7 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
       { id: 'criteriaNotice', t: '정량평가 기준 공지 및 확인 서명부', s: '전체 교원 확인 서명' },
       { id: 'form2blank', t: '[서식2] 개인별 세부평가표(배부용)', s: '평가대상자 수만큼, 평가자 이름 없음' },
       { id: 'form2keep', t: '[서식2] 개인별 세부평가표(보관용)', s: '다면평가자 공동 서명란 포함' },
+      { id: 'form3', t: '[서식3] 교사 자기실적평가서(개인별 빈 양식)', s: '평가대상자 작성·제출, 학교 보관' },
       ...Es.map(e => ({ id: 'form1:' + e.id, t: `[서식1] 다면평가자별 평가표 — ${e.name}`, s: '다면평가자 서명' }))] });
     g.push({ grp: '내부결재용(입력순, 평정자·확인자 날인)', items: [
       ...DM.QUAL.map((q, k) => ({ id: 'form11:' + k, t: `[서식1-1] 요소별 집계표 — ${q.name}`, s: '정성 요소별 집계' })),
@@ -1177,6 +1185,7 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
         if (id === 'criteriaNotice') return docCriteriaNotice();
         if (id === 'form2blank') return docForm2(false);
         if (id === 'form2keep') return docForm2(true);
+        if (id === 'form3') return docForm3();
         if (id.startsWith('form1:')) return docForm1(Cp, id.slice(6));
         if (id.startsWith('form11:')) return docForm11(Cp, +id.slice(7));
         if (id === 'form21') return docForm21(Cp);
@@ -1224,6 +1233,35 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
     });
     body += `<tr><td colspan="${withScore ? 4 : 3}"><b>평가점(총점)(100점)</b></td>${withScore ? '<td></td><td></td>' : '<td></td>'}</tr>`;
     return `<table class="${withScore ? 'tight' : ''}"><thead><tr><th style="width:12%">평가요소</th><th colspan="2">평가 내용 및 세부 기준</th><th style="width:7%">점수</th>${withScore ? '<th style="width:22%">실적내용<br>(본인기재)</th><th style="width:9%">평정점</th>' : ''}</tr></thead><tbody>${body}</tbody></table>`;
+  }
+  function docForm3() {
+    const line = (t, h = 9) => `<tr><td class="l" style="height:${h}mm;vertical-align:top">${t}</td></tr>`;
+    return T().map(p => `<div class="page"><p class="flabel">[서식 3] (제28조의2 제2항 관련) 학교보관\n■ 교육공무원 승진규정 [별지 제3호의2서식] &lt;개정 2016. 12. 30.&gt;</p>
+      <h1>교사 자기실적평가서</h1>
+      <table style="font-size:9pt"><tbody>
+        ${line('1. 평가 지침: 근무성적평정의 신뢰성과 타당성이 보장되도록 객관적 근거에 따라 종합적으로 평가하여야 한다.', 7)}
+        ${line(`2. 평가 기간: ${esc(S.info.from)}부터 ${esc(S.info.to)}까지`, 7)}
+        ${line(`3. 평가자 인적사항 &nbsp;○ 소속: ${school()} &nbsp;&nbsp;○ 직위: ${esc(p.kind || '교사')} &nbsp;&nbsp;○ 성명: ${esc(p.name)}`, 7)}
+        <tr><td class="l" style="padding:1.5mm 2mm">4. 평가자 기초 자료
+          <table style="margin-top:1mm"><tbody>
+          <tr><td class="l">○ 담당 학년 및 학급:</td><td class="l">○ 주당 수업시간 수:</td></tr>
+          <tr><td class="l">○ 담당 과목:</td><td class="l">○ 연간 수업공개 실적:</td></tr>
+          <tr><td class="l">○ 담임 여부:</td><td class="l">○ 연간 학생 상담 실적:</td></tr>
+          <tr><td class="l">○ 담당 업무:</td><td class="l">○ 연간 학부모 상담 실적:</td></tr>
+          <tr><td class="l">○ 보직교사 여부:</td><td class="l">○ 그 밖의 실적사항:</td></tr></tbody></table></td></tr>
+        ${line('5. 자기실적 평가', 5)}
+        ${line('가. 학습지도<br>○ 학습지도 추진 목표(학년 초에 계획되었던 학습지도 목표)<br><br><br>○ 학습지도 추진 실적(학년 초에 목표한 내용과 대비하여 추진 실적을 구체적으로 작성)', 34)}
+        ${line('나. 생활지도<br>○ 생활지도 추진 목표<br><br><br>○ 생활지도 추진 실적', 30)}
+        ${line('다. 전문성개발<br>○ 전문성개발 추진 목표<br><br>○ 전문성개발 추진 실적', 24)}
+        ${line('라. 담당 업무<br>○ 담당 업무 추진 목표<br><br>○ 담당 업무 추진 실적<br><br>○ 창의적 업무개선 사항', 30)}
+      </tbody></table>
+      <p class="sub" style="margin:2mm 0 1mm">※ 자기 평가 종합 상황</p>
+      <table class="tight"><thead><tr><th style="width:16%">구분</th><th>내용</th><th style="width:9%">만족</th><th style="width:9%">보통</th><th style="width:9%">미흡</th></tr></thead><tbody>
+        <tr><td>목표달성도</td><td class="l">설정한 목표에 대한 달성 정도</td><td></td><td></td><td></td></tr>
+        <tr><td>창 의 성</td><td class="l">학습지도, 생활지도, 전문성개발, 담당 업무 등의 창의적인 수행 정도</td><td></td><td></td><td></td></tr>
+        <tr><td>적 시 성</td><td class="l">학습지도, 생활지도, 전문성개발, 담당 업무 등을 기한 내에 효과적으로 처리한 정도</td><td></td><td></td><td></td></tr>
+        <tr><td>노 력 도</td><td class="l">목표 달성을 위한 노력, 공헌도</td><td></td><td></td><td></td></tr></tbody></table>
+      <div class="sig" style="margin-top:6mm"><span>년 &nbsp;&nbsp;&nbsp;&nbsp;월 &nbsp;&nbsp;&nbsp;&nbsp;일</span><span>작성자(본인) 성명 ${esc(p.name)} &nbsp;&nbsp;서명(인)</span></div>${A4}</div>`).join('');
   }
   function docForm2(keep) {
     const Es = E();
