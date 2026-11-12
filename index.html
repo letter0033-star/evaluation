@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>교사 다면평가·근무성적평정 프로그램 (2025학년도, PC용)</title>
+<title>교사 다면평가·근무성적평정 프로그램 (2026학년도, PC용)</title>
 <style>
 :root{
   --bg:#f4f5f7; --panel:#fff; --ink:#1d2433; --muted:#667085; --line:#d9dde4; --line2:#eceef2;
@@ -570,7 +570,7 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
 
   const blankState = () => ({
     v: 1,
-    info: { school: '', level: '초등학교', type: 'regular', year: 2025, from: '2025. 3. 1.', to: '2026. 2. 28.',
+    info: { school: '', level: '초등학교', type: 'regular', year: 2026, from: '2026. 3. 1.', to: '2027. 2. 28.',
       vpTitle: '교감', vpName: '', prTitle: '교장', prName: '', dirTitle: '교육과장', dirName: '' },
     people: [], criteria: DEFAULT_CRITERIA(), qual: {}, quant: {}, gp: {}, perfRate: { qual: 20, quant: 80 },
     evalKeys: {}, evalPwMode: 'each', evalPwCommon: '', evalPw: {}, updated: null
@@ -777,7 +777,8 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
       </div>
       <div class="card"><h3>연습해 보기</h3>
         <p class="note" style="margin-top:0">가상의 연습 자료를 불러옵니다. 현재 입력된 자료는 바뀌므로 먼저 백업하세요.</p>
-        <div class="row" style="align-items:flex-start;margin-bottom:8px"><button class="btn pri" data-act="sample35">연습 자료 불러오기(교원 35명)</button><span class="note" style="flex:1">한빛초(가상) 교원 35명(보건·영양·특수·전문상담교사 포함), 다면평가자 7명(31~35명 기준 최소 인원). 정성·정량·교감·교장 순위까지 모두 입력되어 있고, ⑦총점과 ⑧조정점 등급이 <b>1명(황준서)</b> 어긋나 있어 수동조정을 연습할 수 있습니다.</span></div>
+        <div class="row" style="align-items:flex-start;margin-bottom:8px"><button class="btn pri" data-act="sample35">선택.1 연습 자료 불러오기(28학급 규모/교원 35명)</button><span class="note" style="flex:1">한빛초(가상) 28학급 규모, 교원 35명(보건·영양·특수·전문상담교사 포함), 다면평가자 7명(31~35명 기준 최소 인원). 정성·정량·교감·교장 순위까지 모두 입력되어 있고, ⑦총점과 ⑧조정점 등급이 <b>1명(황준서)</b> 어긋나 있어 수동조정을 연습할 수 있습니다.</span></div>
+        <div class="row" style="align-items:flex-start;margin-bottom:8px"><button class="btn pri" data-act="sample9">선택.2 연습 자료 불러오기(6학급 규모/교원 9명)</button><span class="note" style="flex:1">푸른솔초(가상) 6학급 규모, 교원 9명(보건·특수교사 포함), 다면평가자 3명(15명 이하 기준 최소 인원). 정성·정량·교감·교장 순위까지 모두 입력되어 있고, ⑦총점과 ⑧조정점 등급이 <b>1명(박서윤)</b> 어긋나 있어 수동조정을 연습할 수 있습니다.</span></div>
       </div>
     </div>
     <div class="card"><h3>엑셀 프로그램과 달라진 점</h3>
@@ -802,9 +803,9 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
       <label class="f"><span>평가 구분</span><select data-info="type">
         <option value="regular" ${i.type === 'regular' ? 'selected' : ''}>정규교사 — 근무성적평정 + 다면평가</option>
         <option value="contract" ${i.type === 'contract' ? 'selected' : ''}>계약제(기간제) 교원 — 성과급용 다면평가만</option></select></label>
-      ${inp('year', '평정 학년도')}${inp('from', '평가기간 시작', '2025. 3. 1.')}${inp('to', '평가기간 끝', '2026. 2. 28.')}
+      ${inp('year', '평정 학년도')}${inp('from', '평가기간 시작', '2026. 3. 1.')}${inp('to', '평가기간 끝', '2027. 2. 28.')}
     </div>
-    <p class="note">평가기간: 2025. 3. 1.~2026. 2. 28.(12개월). 승진 활용과 개인성과급 활용 평가기간이 같으며 다면평가는 1회만 실시합니다. 8월 퇴임자·기간제 교원이 있으면 엑셀 때처럼 별도 작업 파일로 따로 운영하세요.</p></div>
+    <p class="note">평가기간: 2026. 3. 1.~2027. 2. 28.(12개월). 승진 활용과 개인성과급 활용 평가기간이 같으며 다면평가는 1회만 실시합니다. 8월 퇴임자·기간제 교원이 있으면 엑셀 때처럼 별도 작업 파일로 따로 운영하세요.</p></div>
     <div class="card"><h3>평정자·확인자·조정자</h3><div class="grid3">
       ${inp('vpTitle', '평정자 직위', '교감')}${inp('vpName', '평정자 성명 (다면평가관리위원회 위원장)')}<div></div>
       ${inp('prTitle', '확인자 직위', '교장')}${inp('prName', '확인자 성명')}<div></div>
@@ -874,7 +875,7 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
     <div class="grid2">
       <div class="card"><h3>평가대상자 <small>교육공무원 승진규정 제2조</small></h3><ul class="note" style="margin:0;padding-left:18px;line-height:1.7">
         <li>학교에 근무하는 교사(수석교사 제외)</li><li>평정단위 학년도에 실제 근무한 기간이 2개월 미만인 사람은 제외(휴가·휴직·직위해제·정직·교육훈련파견 등 미종사 기간 제외, 기간 분리 시 60일=2개월)</li>
-        <li>기간제교사·2025년 8월 말 퇴직자·2026. 2. 28. 이전 의원면직자는 근무성적평정 대상 아님</li></ul></div>
+        <li>기간제교사·2026년 8월 말 퇴직자·2027. 2. 28. 이전 의원면직자는 근무성적평정 대상 아님</li></ul></div>
       <div class="card"><h3>다면평가자 선정기준 <small>제28조의4</small></h3><ul class="note" style="margin:0;padding-left:18px;line-height:1.7">
         <li>평가일 현재 당해 학교 실근무 10개월 이상인 정규교사, 업무 실적을 종합적으로 파악할 수 있는 교사(수석교사 가능)</li>
         <li>제외: 휴직·파견·직위해제·정직 중인 교사, 계약제 교원</li>
@@ -1093,7 +1094,7 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
     return `<h2>근무성적평정·합산 <small class="note">[서식4]·[서식6]</small></h2>
     <p class="lead">평정자(교감)·확인자(교장)가 순위를 매기면 조견표에 따라 요소별 점수(소수 셋째 자리 버림)가 부여됩니다. 근무성적평정점 60점 = 평정자 평정점 × 0.2 + 확인자 평정점 × 0.4, 총점 = 근평 60 + 다면 40.</p>
     ${notReady ? `<div class="msg warn">다면평가 점수가 아직 없는 교사가 ${notReady}명 있습니다. 정성·정량평가를 먼저 마치세요.</div>` : ''}
-    <div class="card"><h3>평정 분포 점검 <small>평정인원 ${N}명 · 배정표 수 ${bj[0]} · 우 ${bj[1]} · 미 ${bj[2]} · 양 ${bj[3]} (양은 미에 포함 가능)</small></h3>
+    <div class="card"><h3>평정 분포 점검 <small>평정인원 ${N}명 · 배정표 수 ${bj[0]} · 우 ${bj[1]} · 미 ${bj[2] + bj[3]} (‘양’ 비율 ${bj[3]}명은 적용하지 않고 ‘미’에 가산)</small></h3>
       <div class="dist">
         ${dbox('배정표(시행공문 붙임4)', { 수: bj[0], 우: bj[1], 미: bj[2] + bj[3], 양: 0 })}
         ${dbox('⑧ 조정점 기준', d && d.adj)}
@@ -1476,6 +1477,28 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
     const P=mk(0.1),Q=mk(0.1); ids.forEach(o=>s.gp[o]={p:P[o],q:Q[o]});
     return s;
   }
+
+  // ── 연습 자료 9명(6학급 규모): 다면평가자 3명(15명 이하 최소 인원, 4인 미만이라 최고·최저 제외 없음),
+  //    교감·교장 순위까지 입력, ⑦·⑧ 등급이 1명(박서윤) 어긋나게 만들어 수동조정을 연습하도록 구성 ──
+  function sample9(seed){
+    let x=seed>>>0; const rnd=()=>{x^=x<<13;x>>>=0;x^=x>>>17;x^=x<<5;x>>>=0;return x/4294967296;};
+    const names=['김하늘','이도현','박서윤','최민서','정우진','강지안','조예준','윤서아','장하준'];
+    const kinds={6:'보건교사',7:'특수교사'};
+    const evIdx=[1,4,8];
+    const lat=names.map(()=>rnd());
+    const s=blankState(); s.sample=true; Object.assign(s.info,{school:'푸른솔초등학교',vpName:'김교감',prName:'이교장',dirName:'박과장'});
+    names.forEach((n,i)=>{const id='sy'+String(i).padStart(2,'0');
+      s.people.push({id,name:n,birth:(v=>String(65+Math.floor(v/336))+String(1+Math.floor(v%336/28)).padStart(2,'0')+String(1+v%28).padStart(2,'0'))(Math.floor(rnd()*names.length*336)),kind:kinds[i]||'교사',target:true,evaluator:evIdx.includes(i),discipline:'',note:''});
+      const q=lat[i]; const sec=[30,30,10,30].map(m=>Math.max(Math.round(m*0.7),Math.min(m,Math.round(m*(0.8+0.2*q)+(rnd()*2-1)*m/30*1.5))));
+      s.quant[id]=sec;});
+    const ids=s.people.map(p=>p.id);
+    evIdx.forEach(e=>{const ev=ids[e]; const others=ids.filter(v=>v!==ev);
+      const sc=others.map(o=>({o,v:lat[ids.indexOf(o)]+ (rnd()-0.5)*0.18})).sort((a,b)=>b.v-a.v);
+      const r={}; sc.forEach((z,k)=>r[z.o]=k+1); s.qual[ev]={mode:'rank',ranks:r,src:'연습 자료(9명)'};});
+    const mk=(noise)=>{const sc=ids.map(o=>({o,v:lat[ids.indexOf(o)]+(rnd()-0.5)*noise})).sort((a,b)=>b.v-a.v);const r={};sc.forEach((z,k)=>r[z.o]=k+1);return r;};
+    const P=mk(0.1),Q=mk(0.1); ids.forEach(o=>s.gp[o]={p:P[o],q:Q[o]});
+    return s;
+  }
   
   
   // ── 대화상자 ──
@@ -1530,7 +1553,8 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
       S = blankState(); ui.undoGp = null; ui.printSel = []; ui.gpOpen = {}; save(); go('home'); toast('연습 자료를 삭제했습니다.');
     }
     else if (a === 'lock') lockNow('잠겼습니다.');
-    else if (a === 'sample35') { if (confirm('연습 자료를 불러오면 현재 자료가 바뀝니다. 계속할까요?')) { S = sample35(3); save(); go('roster'); toast('연습 자료(교원 35명)를 불러왔습니다.'); } }
+    else if (a === 'sample35') { if (confirm('연습 자료를 불러오면 현재 자료가 바뀝니다. 계속할까요?')) { S = sample35(3); save(); go('roster'); toast('연습 자료(28학급 규모/교원 35명)를 불러왔습니다.'); } }
+    else if (a === 'sample9') { if (confirm('연습 자료를 불러오면 현재 자료가 바뀝니다. 계속할까요?')) { S = sample9(2); save(); go('roster'); toast('연습 자료(6학급 규모/교원 9명)를 불러왔습니다.'); } }
     else if (a === 'addRow') { S.people.push({ id: uid(), name: '', birth: '', kind: '교사', target: true, evaluator: false, discipline: '', note: '' }); save(); render(); setTimeout(() => { const ins = $$('input[data-k="name"]'); ins[ins.length - 1]?.focus(); }, 0); }
     else if (a === 'pasteRoster') showDialog('엑셀에서 붙여넣기', `<p class="note" style="margin-top:0">엑셀의 [성명, 생년월일, (다면평가자 여부: ○ 또는 Y)] 열을 복사해 붙여넣으세요. 한 줄에 한 명입니다.</p><textarea id="pasteBox" rows="12" style="width:100%" placeholder="김민준	650101	○&#10;이서연	700315"></textarea><label class="row note" style="margin-top:6px"><input type="checkbox" id="pasteReplace"> 기존 명단을 지우고 바꾸기</label>`, `<button class="btn" data-dlgclose>취소</button><button class="btn pri" data-act="pasteDo">추가</button>`);
     else if (a === 'pasteDo') {
