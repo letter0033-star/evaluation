@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>교사 다면평가·근무성적평정 프로그램 (2025학년도, PC용)</title>
+<style>
+:root{
+  --bg:#f4f5f7; --panel:#fff; --ink:#1d2433; --muted:#667085; --line:#d9dde4; --line2:#eceef2;
+  --brand:#1f4e8c; --brand2:#2f6fbf; --brandbg:#e9f0fa;
+  --ok:#1a7f45; --okbg:#e7f5ec; --warn:#a15c00; --warnbg:#fff4e0; --err:#b42318; --errbg:#fdecea;
+  --su:#1f4e8c; --u:#2f855a; --mi:#a15c00; --yang:#b42318;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif;font-size:14px;color:var(--ink);background:var(--bg);line-height:1.5}
+button,input,select,textarea{font:inherit;color:inherit}
+#app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+#side{background:#14233b;color:#d7deea;padding:18px 0;position:sticky;top:0;height:100vh;overflow:auto}
+#side h1{font-size:15px;line-height:1.35;margin:0 18px 4px;color:#fff;font-weight:700}
+#side .sub{font-size:12px;margin:0 18px 16px;color:#9fb0c8}
+#side ol{list-style:none;margin:0;padding:0;counter-reset:s}
+#side li button{all:unset;display:flex;gap:10px;align-items:flex-start;width:100%;box-sizing:border-box;padding:9px 18px;cursor:pointer;font-size:13.5px}
+#side li button:hover{background:#1c3152}
+#side li button.on{background:#24406b;color:#fff;box-shadow:inset 3px 0 0 #7fb2ff}
+#side .num{flex:none;width:22px;height:22px;border-radius:50%;background:#2a4268;color:#cfe0ff;display:grid;place-items:center;font-size:12px;font-weight:700}
+#side .num.done{background:#2f855a;color:#fff}
+#side .num.bad{background:#b42318;color:#fff}
+#side .stat{display:block;font-size:11.5px;color:#9fb0c8;margin-top:1px}
+#side .foot{margin:18px;font-size:11.5px;color:#8ea0bb;border-top:1px solid #2a3c59;padding-top:12px}
+#side .foot button{all:unset;cursor:pointer;display:block;color:#cfe0ff;margin:6px 0;font-size:12.5px}
+#side .foot button:hover{text-decoration:underline}
+main{padding:24px 32px 80px;max-width:1280px}
+h2{font-size:21px;margin:0 0 4px}
+.lead{color:var(--muted);margin:0 0 18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-bottom:16px}
+.card h3{font-size:15.5px;margin:0 0 10px}
+.card h3 small{font-weight:400;color:var(--muted);font-size:12.5px;margin-left:6px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 20px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 20px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:#344054}
+label.f span{font-weight:600}
+input[type=text],input[type=number],input:not([type]),select,textarea{border:1px solid var(--line);border-radius:6px;padding:6px 8px;background:#fff;min-width:0}
+input:focus,select:focus,textarea:focus{outline:2px solid #a9c7f5;border-color:var(--brand2)}
+input.num{width:64px;text-align:right}
+input.rk{width:56px;text-align:center;font-weight:700}
+input.bad,select.bad{background:var(--errbg);border-color:#f3a59c}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:13.5px;white-space:nowrap}
+.btn:hover{background:#f2f4f7}
+.btn.pri{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.pri:hover{background:#183f72}
+.btn.sm{padding:3px 8px;font-size:12.5px}
+.btn.danger{color:var(--err)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row.end{justify-content:flex-end}
+.spacer{flex:1}
+table.t{border-collapse:collapse;width:100%;font-size:13px;background:#fff}
+table.t th,table.t td{border:1px solid var(--line);padding:5px 6px;text-align:center;vertical-align:middle}
+table.t th{background:#f2f4f7;font-weight:600;color:#344054}
+table.t td.l{text-align:left;white-space:nowrap}
+table.t td.r{text-align:right;font-variant-numeric:tabular-nums}
+table.t tr.self td{background:#f7f7f7;color:#98a2b3}
+table.t tr.hl td{background:#fff8e6}
+table.t tr.err td{background:#fff1f0}
+.tbl-wrap{overflow:auto;max-width:100%}
+.note{font-size:12.5px;color:var(--muted)}
+.msg{border-radius:8px;padding:10px 12px;margin:8px 0;font-size:13.5px}
+.msg.err{background:var(--errbg);color:var(--err);border:1px solid #f6c3bd}
+.msg.warn{background:var(--warnbg);color:var(--warn);border:1px solid #f4d39c}
+.msg.ok{background:var(--okbg);color:var(--ok);border:1px solid #b5dfc3}
+.msg.info{background:var(--brandbg);color:#1d3d6b;border:1px solid #c6d8f2}
+.msg ul{margin:4px 0 0 18px;padding:0}
+.pill{display:inline-block;border-radius:999px;padding:1px 8px;font-size:12px;font-weight:600}
+.pill.ok{background:var(--okbg);color:var(--ok)}
+.pill.err{background:var(--errbg);color:var(--err)}
+.pill.warn{background:var(--warnbg);color:var(--warn)}
+.pill.mute{background:#eef0f3;color:#667085}
+.g-수{color:var(--su);font-weight:700}.g-우{color:var(--u);font-weight:700}.g-미{color:var(--mi);font-weight:700}.g-양{color:var(--yang);font-weight:700}
+.steps{counter-reset:k;margin:0;padding:0;list-style:none}
+.steps li{counter-increment:k;position:relative;padding:6px 0 6px 34px}
+.steps li::before{content:counter(k);position:absolute;left:0;top:6px;width:24px;height:24px;border-radius:50%;background:var(--brandbg);color:var(--brand);font-weight:700;display:grid;place-items:center;font-size:12.5px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:13px}
+.kv b{color:#344054}
+.dist{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.dist .box{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff}
+.dist .box h4{margin:0 0 6px;font-size:12.5px;color:var(--muted);font-weight:600}
+.dist .box .v{font-size:15px;font-variant-numeric:tabular-nums}
+.dist .box.bad{border-color:#f3a59c;background:#fff6f5}
+.dist .box.good{border-color:#a9d8b8;background:#f4fbf6}
+details.adj{margin-top:4px}
+details.adj summary{cursor:pointer;color:var(--brand2);font-size:12.5px}
+.mini{font-size:12px;color:var(--muted)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:12px;flex-wrap:wrap}
+.tabs button{all:unset;cursor:pointer;padding:7px 12px;border-radius:6px 6px 0 0;font-size:13.5px;color:#475467}
+.tabs button.on{background:#fff;border:1px solid var(--line);border-bottom-color:#fff;margin-bottom:-1px;color:var(--brand);font-weight:700}
+.doclist{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
+.doclist label{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff;cursor:pointer;font-size:13px}
+.doclist label:hover{border-color:var(--brand2)}
+.doclist small{display:block;color:var(--muted);font-size:11.5px}
+dialog{border:none;border-radius:12px;padding:0;max-width:min(920px,94vw);box-shadow:0 20px 50px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(16,24,40,.45)}
+dialog .dh{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+dialog .dh h3{margin:0;font-size:16px}
+dialog .db{padding:14px 18px;max-height:70vh;overflow:auto}
+dialog .df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+#toast{position:fixed;right:20px;bottom:20px;background:#14233b;color:#fff;padding:10px 14px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:99;font-size:13.5px}
+#toast.on{opacity:.95}
+
+/* ── 인쇄 미리보기·인쇄 ─────────────────────────── */
+#preview{background:#8a919c;padding:20px;border-radius:10px;overflow:auto;max-height:78vh}
+.page{background:#fff;width:210mm;min-height:297mm;margin:0 auto 16px;padding:14mm 12mm;box-shadow:0 2px 10px rgba(0,0,0,.25);font-family:"Malgun Gothic","맑은 고딕",sans-serif;color:#000;font-size:10pt;position:relative}
+.page.land{width:297mm;min-height:210mm}
+.page .flabel{font-size:8.5pt;margin:0 0 2px;white-space:pre-line}
+.page .fpage{position:absolute;right:12mm;top:14mm;font-size:9pt}
+.page h1{text-align:center;font-size:15pt;margin:4mm 0 4mm;letter-spacing:.5px}
+.page h1.u{text-decoration:underline;text-underline-offset:4px}
+.page .sub{font-size:10pt;margin:0 0 2mm}
+.page table{border-collapse:collapse;width:100%}
+.page th,.page td{border:1px solid #000;padding:1.2mm 1mm;text-align:center;vertical-align:middle;font-size:9pt;line-height:1.3}
+.page th{font-weight:600;background:#f3f3f3}
+.page td.l{text-align:left}
+.page td.r{text-align:right}
+.page .sig{display:flex;justify-content:flex-end;gap:12mm;margin-top:5mm;font-size:10pt}
+.page .remark{font-size:8.5pt;margin-top:3mm;white-space:pre-line;line-height:1.45;border:1px solid #000;padding:2mm 3mm}
+.page .foot{font-size:8pt;text-align:right;margin-top:2mm;color:#333}
+.page .hdr td{font-size:9pt}
+.page .blank{color:transparent}
+.page .tight th,.page .tight td{font-size:8pt;padding:.8mm .5mm}
+.page .xtight th,.page .xtight td{font-size:7pt;padding:.6mm .3mm}
+.page .watermark{position:absolute;top:6mm;left:12mm;font-size:8.5pt;border:1px solid #000;padding:.5mm 2mm}
+@media print{
+  @page{size:A4;margin:0}
+  body{background:#fff}
+  #app>*:not(main),main>*:not(#printZone),#printZone>*:not(#preview),#toast,dialog{display:none !important}
+  #app{display:block}
+  main{padding:0;max-width:none}
+  #printZone{display:block !important}
+  #preview{background:none;padding:0;max-height:none;overflow:visible;border-radius:0}
+  .page{box-shadow:none;margin:0;page-break-after:always;break-after:page;min-height:auto;height:auto}
+  .page:last-child{page-break-after:auto;break-after:auto}
+  .page th{background:#f3f3f3 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <nav id="side"></nav>
+  <main id="main"></main>
+</div>
+<div id="toast"></div>
+<dialog id="dlg"></dialog>
+<input type="file" id="filePick" hidden>
+<script>
+/* =====================================================================
+ * 다면평가·근무성적평정 계산 엔진
+ * - 2025학년도 초등학교 다면평가프로그램(최종).xlsm 의 수식을 그대로 옮김
+ * - 조견표(순위→점수)와 근무성적평정점 분포비율 및 인원 배정표(시행공문 붙임4) 내장
+ * ===================================================================== */
+(function (root) {
+  'use strict';
+
+  // ── 조견표: 평가(평정)대상자 수 N(1~100)별 순위→점수. [시작값, 증분, 개수] 구간으로 압축 저장
+  const JG_ENC = [[[100,0,1]],[[100,-5.5,2]],[[100,-5.5,2],[89.5,0,1]],[[100,-5.5,2],[94,-4.5,2]],[[100,-0.5,2],[94.5,-0.5,2],[89.5,0,1]],[[100,-0.5,2],[94.5,-0.5,2],[89.5,-0.5,2]],[[100,-0.5,2],[94.5,-0.5,3],[89.5,-0.5,2]],[[100,-0.5,3],[94.5,-0.5,3],[89.5,-0.5,2]],[[100,-0.5,3],[94.5,-0.5,3],[89.5,-0.5,3]],[[100,-0.5,3],[94.5,-0.5,4],[89.5,-0.5,3]],[[100,-0.5,3],[94.5,-0.5,5],[89.5,-0.5,3]],[[100,-0.5,4],[94.5,-0.5,5],[89.5,-0.5,3]],[[100,-0.5,4],[94.5,-0.5,5],[89.5,-0.5,4]],[[100,-0.5,4],[94.5,-0.5,6],[89.5,-0.5,4]],[[100,-0.5,5],[94.5,-0.5,6],[89.5,-0.5,4]],[[100,-0.5,5],[94.5,-0.5,6],[89.5,-0.5,5]],[[100,-0.5,5],[94.5,-0.5,7],[89.5,-0.5,5]],[[100,-0.5,6],[94.5,-0.5,7],[89.5,-0.5,5]],[[100,-0.5,6],[94.5,-0.5,7],[89.5,-0.5,6]],[[100,-0.5,6],[94.5,-0.5,8],[89.5,-0.5,6]],[[100,-0.5,6],[94.5,-0.5,9],[89.5,-0.5,6]],[[100,-0.5,7],[94.5,-0.5,9],[89.5,-0.5,6]],[[100,-0.5,7],[94.5,-0.5,9],[89.5,-0.5,7]],[[100,-0.5,7],[94.5,-0.5,17]],[[100,-0.5,8],[94.5,-0.5,17]],[[100,-0.5,8],[94.5,-0.5,18]],[[100,-0.5,8],[94.546,-0.454,11],[89.5,-0.5,8]],[[100,-0.5,9],[94.546,-0.454,11],[89.5,-0.5,8]],[[100,-0.5,9],[94.546,-0.454,11],[89.5,-0.5,9]],[[100,-0.5,9],[94.583,-0.417,12],[89.5,-0.5,9]],[[100,-0.5,9],[94.615,-0.385,12],[90,-0.5,10]],[[100,-0.5,10],[94.615,-0.385,12],[90,-0.5,10]],[[100,-0.5,10],[94.615,-0.385,12],[90,-0.5,11]],[[100,-0.5,10],[94.643,-0.357,14],[89.5,-0.5,10]],[[100,-0.45,2],[99.09,-0.45,2],[98.18,-0.45,3],[96.82,-0.45,2],[95.91,-0.45,2],[94.643,-0.357,14],[89.5,-0.5,10]],[[100,-0.45,2],[99.09,-0.45,2],[98.18,-0.45,3],[96.82,-0.45,2],[95.91,-0.45,2],[94.643,-0.357,14],[89.546,-0.454,10],[85.01,0,1]],[[100,-0.45,2],[99.09,-0.45,2],[98.18,-0.45,3],[96.82,-0.45,2],[95.91,-0.45,2],[94.667,-0.333,15],[89.546,-0.454,10],[85.01,0,1]],[[100,-0.417,12],[94.667,-0.333,15],[89.546,-0.454,10],[85.01,0,1]],[[100,-0.417,12],[94.667,-0.333,15],[89.583,-0.417,12]],[[100,-0.417,12],[94.688,-0.312,16],[89.583,-0.417,12]],[[100,-0.417,12],[94.706,-0.294,17],[89.583,-0.417,12]],[[100,-0.385,13],[94.706,-0.294,17],[89.583,-0.417,12]],[[100,-0.385,13],[94.706,-0.294,17],[89.615,-0.385,12],[85,0,1]],[[100,-0.385,13],[94.723,-0.277,18],[89.615,-0.385,12],[85,0,1]],[[100,-0.357,14],[94.723,-0.277,18],[89.615,-0.385,12],[85,0,1]],[[100,-0.357,14],[94.723,-0.277,18],[89.643,-0.357,14]],[[100,-0.357,14],[94.737,-0.263,19],[89.643,-0.357,14]],[[100,-0.333,15],[94.737,-0.263,19],[89.643,-0.357,14]],[[100,-0.333,15],[94.737,-0.263,19],[89.667,-0.333,15]],[[100,-0.333,15],[94.75,-0.25,20],[89.667,-0.333,15]],[[100,-0.333,15],[94.762,-0.238,21],[89.667,-0.333,15]],[[100,-0.312,16],[94.762,-0.238,21],[89.667,-0.333,15]],[[100,-0.312,16],[94.762,-0.238,21],[89.688,-0.312,16]],[[100,-0.312,16],[94.773,-0.227,22],[89.688,-0.312,16]],[[100,-0.294,17],[94.773,-0.227,22],[89.688,-0.312,16]],[[100,-0.294,17],[94.773,-0.227,22],[89.706,-0.294,17]],[[100,-0.294,17],[94.783,-0.217,23],[89.706,-0.294,17]],[[100,-0.277,18],[94.783,-0.217,23],[89.706,-0.294,17]],[[100,-0.277,18],[94.783,-0.217,23],[89.723,-0.277,18]],[[100,-0.277,18],[94.792,-0.208,24],[89.723,-0.277,18]],[[100,-0.277,18],[94.8,-0.2,25],[89.723,-0.277,18]],[[100,-0.263,19],[94.8,-0.2,25],[89.723,-0.277,18]],[[100,-0.263,19],[94.8,-0.2,25],[89.737,-0.263,19]],[[100,-0.263,19],[94.808,-0.192,26],[89.737,-0.263,19]],[[100,-0.25,20],[94.808,-0.192,26],[89.737,-0.263,19]],[[100,-0.25,20],[94.808,-0.192,26],[89.75,-0.25,20]],[[100,-0.25,20],[94.815,-0.185,27],[89.75,-0.25,20]],[[100,-0.238,21],[94.815,-0.185,27],[89.75,-0.25,20]],[[100,-0.238,21],[94.815,-0.185,27],[89.762,-0.238,21]],[[100,-0.238,21],[94.822,-0.178,28],[89.762,-0.238,21]],[[100,-0.238,21],[94.828,-0.172,29],[89.762,-0.238,21]],[[100,-0.227,22],[94.828,-0.172,29],[89.762,-0.238,21]],[[100,-0.227,22],[94.828,-0.172,29],[89.773,-0.227,22]],[[100,-0.227,22],[94.834,-0.166,30],[89.773,-0.227,22]],[[100,-0.217,23],[94.834,-0.166,30],[89.773,-0.227,22]],[[100,-0.217,23],[94.834,-0.166,30],[89.783,-0.217,23]],[[100,-0.217,23],[94.839,-0.161,31],[89.783,-0.217,23]],[[100,-0.208,24],[94.839,-0.161,31],[89.783,-0.217,23]],[[100,-0.208,24],[94.839,-0.161,31],[89.792,-0.208,24]],[[100,-0.208,24],[94.844,-0.156,32],[89.792,-0.208,24]],[[100,-0.208,24],[94.849,-0.151,33],[89.792,-0.208,24]],[[100,-0.2,25],[94.849,-0.151,33],[89.792,-0.208,24]],[[100,-0.2,25],[94.849,-0.151,33],[89.8,-0.2,25]],[[100,-0.2,25],[94.853,-0.147,34],[89.8,-0.2,25]],[[100,-0.192,26],[94.853,-0.147,34],[89.8,-0.2,25]],[[100,-0.192,26],[94.853,-0.147,34],[89.808,-0.192,26]],[[100,-0.192,26],[94.858,-0.142,35],[89.808,-0.192,26]],[[100,-0.185,27],[94.858,-0.142,35],[89.808,-0.192,26]],[[100,-0.185,27],[94.858,-0.142,35],[89.815,-0.185,27]],[[100,-0.185,27],[94.862,-0.138,36],[89.815,-0.185,27]],[[100,-0.185,27],[94.865,-0.135,37],[89.815,-0.185,27]],[[100,-0.178,28],[94.865,-0.135,37],[89.815,-0.185,27]],[[100,-0.178,28],[94.865,-0.135,37],[89.822,-0.178,28]],[[100,-0.178,28],[94.869,-0.131,38],[89.822,-0.178,28]],[[100,-0.172,29],[94.869,-0.131,38],[89.822,-0.178,28]],[[100,-0.172,29],[94.869,-0.131,38],[89.828,-0.172,29]],[[100,-0.172,29],[94.872,-0.128,39],[89.828,-0.172,29]],[[100,-0.166,30],[94.872,-0.128,39],[89.828,-0.172,29]],[[100,-0.166,30],[94.872,-0.128,39],[89.834,-0.166,30]],[[100,-0.166,30],[94.875,-0.125,40],[89.834,-0.166,30]]];
+
+  // ── 시행공문 붙임4 「근무성적평정점 분포비율 및 인원 배정표」 [수, 우, 미, 양] (N=1~100)
+  const BJ = [[1,0,0,0],[1,1,0,0],[1,1,1,0],[1,2,1,0],[2,2,1,0],[2,2,1,1],[2,3,1,1],[3,3,1,1],[3,3,2,1],[3,4,2,1],[3,5,2,1],[4,5,2,1],[4,5,3,1],[4,6,3,1],[5,6,3,1],[5,6,3,2],[5,7,3,2],[6,7,3,2],[6,7,4,2],[6,8,4,2],[6,9,4,2],[7,9,4,2],[7,9,5,2],[7,10,5,2],[8,10,5,2],[8,10,5,3],[8,11,5,3],[9,11,5,3],[9,11,6,3],[9,12,6,3],[9,13,6,3],[10,13,6,3],[10,13,7,3],[10,14,7,3],[11,14,7,3],[11,14,7,4],[11,15,7,4],[12,15,7,4],[12,15,8,4],[12,16,8,4],[12,17,8,4],[13,17,8,4],[13,17,9,4],[13,18,9,4],[14,18,9,4],[14,18,9,5],[14,19,9,5],[15,19,9,5],[15,19,10,5],[15,20,10,5],[15,21,10,5],[16,21,10,5],[16,21,11,5],[16,22,11,5],[17,22,11,5],[17,22,11,6],[17,23,11,6],[18,23,11,6],[18,23,12,6],[18,24,12,6],[18,25,12,6],[19,25,12,6],[19,25,13,6],[19,26,13,6],[20,26,13,6],[20,26,13,7],[20,27,13,7],[21,27,13,7],[21,27,14,7],[21,28,14,7],[21,29,14,7],[22,29,14,7],[22,29,15,7],[22,30,15,7],[23,30,15,7],[23,30,15,8],[23,31,15,8],[24,31,15,8],[24,31,16,8],[24,32,16,8],[24,33,16,8],[25,33,16,8],[25,33,17,8],[25,34,17,8],[26,34,17,8],[26,34,17,9],[26,35,17,9],[27,35,17,9],[27,35,18,9],[27,36,18,9],[27,37,18,9],[28,37,18,9],[28,37,19,9],[28,38,19,9],[29,38,19,9],[29,38,19,10],[29,39,19,10],[30,39,19,10],[30,39,20,10],[30,40,20,10]];
+
+  const JG = JG_ENC.map(segs => {
+    const col = [];
+    segs.forEach(([a, d, n]) => { for (let k = 0; k < n; k++) col.push(Math.round((a + d * k) * 1000) / 1000); });
+    return col;
+  });
+
+  // ── 엑셀 ROUND / ROUNDDOWN 과 같은 결과를 내도록(부동소수 오차 제거 후 처리)
+  const clean = x => Number(Number(x).toPrecision(12));
+  function round(x, d = 2) { const m = 10 ** d; const v = clean(Math.abs(x) * m); return Math.sign(x) * Math.round(v) / m; }
+  function rounddown(x, d = 2) { const m = 10 ** d; const v = clean(Math.abs(x) * m); return Math.sign(x) * Math.floor(v) / m; }
+  const add = (...a) => round(a.reduce((s, v) => s + (Number(v) || 0), 0), 3);
+
+  /** 조견표 점수: N명 중 rank위 */
+  function table(rank, N) {
+    if (!(N >= 1 && N <= 100)) return null;
+    if (!(rank >= 1)) return null;
+    const r = Math.min(Math.round(rank), N);  // 엑셀: 순위가 대상자 수보다 크면 대상자 수로 처리
+    return JG[N - 1][r - 1];
+  }
+  function baejeong(N) { return N >= 1 && N <= 100 ? BJ[N - 1].slice() : null; }
+  function grade(s) { if (s == null || s === '' || isNaN(s)) return ''; s = clean(s); return s >= 95 ? '수' : s >= 90 ? '우' : s >= 85 ? '미' : '양'; }
+  /** 승진규정 제28조의4: 평가대상자 수별 최소 다면평가자 수 */
+  function minEvaluators(N) { return N <= 15 ? 3 : N <= 20 ? 4 : N <= 25 ? 5 : N <= 30 ? 6 : N <= 35 ? 7 : 8; }
+
+  // 정성평가 요소: [이름, 배점, 조견표점수에 곱하는 계수]  (학습지도는 총점-나머지)
+  const QUAL = [
+    { key: 'att', name: '교육공무원으로서의 태도', short: '태도', max: 10, f: 0.1 },
+    { key: 'learn', name: '학습지도', short: '학습지도', max: 40, f: null },
+    { key: 'life', name: '생활지도', short: '생활지도', max: 30, f: 0.3 },
+    { key: 'pro', name: '전문성개발', short: '전문성개발', max: 5, f: 0.05 },
+    { key: 'duty', name: '담당업무', short: '담당업무', max: 15, f: 0.15 }
+  ];
+  const QUANT = [
+    { key: 'learn', name: '학습지도', max: 30 },
+    { key: 'life', name: '생활지도', max: 30 },
+    { key: 'pro', name: '전문성개발', max: 10 },
+    { key: 'duty', name: '담당업무', max: 30 }
+  ];
+  // 근무성적평정 요소 계수(평정점 100점 기준)
+  const GP_F = [0.1, 0.4, 0.3, 0.05, 0.15];
+
+  /** [서식1] 다면평가자 1명이 매긴 한 사람의 요소별 점수 — 평가자평가표 C~H열 */
+  function qualFromScore(t) {
+    if (t == null || t === '' || isNaN(t)) return null;
+    const total = round(t, 2);
+    const att = round(t / 10, 2), life = round(t / 10 * 3, 2), pro = round(t / 10 * 0.5, 2), duty = round(t / 10 * 1.5, 2);
+    const learn = round(total - att - life - pro - duty, 2);
+    return { el: [att, learn, life, pro, duty], total };
+  }
+
+  function targets(st) { return st.people.filter(p => p.target && p.name); }
+  function evaluators(st) { return st.people.filter(p => p.evaluator && p.name); }
+
+  /** 다면평가자 한 명이 평가해야 할 대상자(본인 제외)와 실평가대상자 수 */
+  function evalScope(st, evId) {
+    const list = targets(st).filter(p => p.id !== evId);
+    return { list, N: list.length };
+  }
+
+  /** 다면평가자 한 명의 서식1 행 */
+  function qualSheet(st, evId) {
+    const { list, N } = evalScope(st, evId);
+    const q = (st.qual && st.qual[evId]) || {};
+    const direct = q.mode === 'score';
+    const rows = list.map(p => {
+      let rank = q.ranks ? q.ranks[p.id] : null;
+      rank = rank === '' || rank == null ? null : Number(rank);
+      let raw = null;
+      if (direct) { const s = q.scores ? q.scores[p.id] : null; raw = s === '' || s == null ? null : Number(s); }
+      else if (rank) raw = table(rank, N);
+      const r = qualFromScore(raw);
+      return { id: p.id, name: p.name, rank, raw, el: r ? r.el : null, total: r ? r.total : null };
+    });
+    // 점검
+    const issues = [];
+    if (!direct) {
+      const seen = {};
+      rows.forEach(r => { if (r.rank) seen[r.rank] = (seen[r.rank] || 0) + 1; });
+      rows.forEach(r => {
+        r.dup = r.rank && seen[r.rank] > 1;
+        r.bad = r.rank != null && (!(r.rank >= 1 && r.rank <= N) || !Number.isInteger(r.rank));
+      });
+      const missing = []; for (let k = 1; k <= N; k++) if (!seen[k]) missing.push(k);
+      if (rows.some(r => r.rank == null)) issues.push('순위를 입력하지 않은 대상자가 있습니다.');
+      if (rows.some(r => r.dup)) issues.push('중복된 순위가 있습니다.');
+      if (rows.some(r => r.bad)) issues.push(`순위는 1~${N} 사이의 정수여야 합니다.`);
+      if (!issues.length && missing.length) issues.push('누락된 순위: ' + missing.join(', '));
+    } else {
+      rows.forEach(r => { r.bad = r.raw != null && (r.raw < 85 || r.raw > 100); });
+      if (rows.some(r => r.raw == null)) issues.push('점수를 입력하지 않은 대상자가 있습니다.');
+      if (rows.some(r => r.bad)) issues.push('직접 입력 점수는 85~100점 범위여야 합니다.');
+      const tot = rows.filter(r => r.total != null).map(r => r.total);
+      if (new Set(tot).size !== tot.length) issues.push('동점이 있습니다(특별한 사정이 없으면 동점을 주지 않음).');
+    }
+    rows.forEach(r => { if (r.el && r.el[1] > 40) issues.push(`${r.name}: 학습지도 점수가 40점을 넘습니다.`); });
+    const complete = rows.length > 0 && rows.every(r => r.total != null) && !issues.length;
+    return { N, rows, issues, complete, direct };
+  }
+
+  /** [서식1-1] 요소별 집계: 최고·최저 제외(평가자 4인 이상), 평균 */
+  function aggregate(vals) {
+    const v = vals.filter(x => x != null);
+    const cnt = v.length;
+    if (!cnt) return { cnt, sum: null, avg: null, max: null, min: null };
+    const s = add(...v), mx = Math.max(...v), mn = Math.min(...v);
+    const sum = cnt < 4 ? s : add(s, -mx, -mn);
+    const avg = cnt < 4 ? round(sum / cnt, 2) : round(sum / (cnt - 2), 2);
+    return { cnt, sum, avg, max: mx, min: mn, dropped: cnt >= 4 };
+  }
+
+  function rates(st, mode) {
+    if (mode === 'perf') return { qual: Number(st.perfRate?.qual ?? 20), quant: Number(st.perfRate?.quant ?? 80) };
+    return { qual: 32, quant: 8 };
+  }
+
+  /** 전체 계산 */
+  function compute(st, mode = 'promo') {
+    const T = targets(st), E = evaluators(st);
+    const N = T.length;
+    const R = rates(st, mode);
+    const sheets = {}; E.forEach(e => { sheets[e.id] = qualSheet(st, e.id); });
+    const byId = {};
+    T.forEach((p, i) => {
+      const o = { id: p.id, idx: i + 1, name: p.name, person: p };
+      // 정성: 요소별 다면평가자 점수
+      o.qualBy = E.map(e => { const r = sheets[e.id].rows.find(x => x.id === p.id); return r && r.el ? r.el : null; });
+      o.qualAgg = QUAL.map((q, k) => aggregate(o.qualBy.map(el => el ? el[k] : null)));
+      const qAvgs = o.qualAgg.map(a => a.avg);
+      o.qualEl = qAvgs;
+      o.qualTotal = qAvgs.every(v => v != null) ? add(...qAvgs) : null;
+      o.qualConv = o.qualTotal != null ? round(o.qualTotal * R.qual / 100, 2) : null;
+      // 정량
+      const qn = (st.quant && st.quant[p.id]) || [];
+      o.quantEl = QUANT.map((q, k) => (qn[k] === '' || qn[k] == null) ? null : Number(qn[k]));
+      o.quantTotal = o.quantEl.every(v => v != null) ? add(...o.quantEl) : null;
+      o.quantConv = o.quantTotal != null ? round(o.quantTotal * R.quant / 100, 2) : null;
+      // 다면 합산
+      o.dmTotal = (o.qualConv != null && o.quantConv != null) ? add(o.qualConv, o.quantConv) : null;
+      // 근무성적평정
+      const g = (st.gp && st.gp[p.id]) || {};
+      const mk = (who) => {
+        const rk = g[who] === '' || g[who] == null ? null : Number(g[who]);
+        const base = rk ? table(rk, N) : null;
+        const auto = GP_F.map(f => base == null ? null : rounddown(base * f, 2));
+        const ov = (g.ov && g.ov[who]) || [];
+        const el = auto.map((v, k) => (ov[k] === '' || ov[k] == null) ? v : Number(ov[k]));
+        const score = el.every(v => v != null) ? add(...el) : null;
+        const conv = score == null ? null : round(score * (who === 'p' ? 0.2 : 0.4), 2);
+        return { rank: rk, base, auto, el, manual: ov.some(v => v !== '' && v != null), score, conv };
+      };
+      o.gpP = mk('p'); o.gpQ = mk('q');
+      o.gpTotal = (o.gpP.conv != null && o.gpQ.conv != null) ? add(o.gpP.conv, o.gpQ.conv) : null;
+      o.total = (o.gpTotal != null && o.dmTotal != null) ? add(o.gpP.conv, o.gpQ.conv, o.dmTotal) : null;
+      byId[p.id] = o;
+    });
+    const list = T.map(p => byId[p.id]);
+    // 순위 (엑셀 RANK: 내림차순, 동점은 같은 순위)
+    const rk = (key) => { const vals = list.map(o => o[key]).filter(v => v != null); list.forEach(o => { o[key + 'Rank'] = o[key] == null ? null : 1 + vals.filter(v => v > o[key]).length; }); };
+    rk('total'); rk('dmTotal'); rk('qualTotal'); rk('quantTotal'); rk('gpTotal');
+    list.forEach(o => {
+      // ⑧ 조정점(참고값: 실제 조정점은 교육지원청 작성). 엑셀 조견표의 부동소수 오차(예: 30명 21위 89.996)로
+      //    배정표와 어긋나는 일이 없도록 소수 둘째 자리로 반올림해 등급을 판정
+      o.adj = o.totalRank ? round(table(o.totalRank, N), 2) : null;
+      o.gradeAdj = grade(o.adj);
+      o.gradeTotal = grade(o.total);
+      o.gradeP = grade(o.gpP.score); o.gradeQ = grade(o.gpQ.score);
+    });
+    return { N, list, byId, sheets, E, T, R, mode, checks: checks(st, list, N, E, sheets) };
+  }
+
+  function countGrades(arr) {
+    const c = { 수: 0, 우: 0, 미: 0, 양: 0 };
+    arr.forEach(g => { if (c[g] != null) c[g]++; });
+    return c;
+  }
+  /** 배정표와 비교(양은 미에 포함 가능) */
+  function distOK(c, N) {
+    const b = baejeong(N); if (!b) return false;
+    return c.수 === b[0] && c.우 === b[1] && (c.미 + c.양) === (b[2] + b[3]);
+  }
+
+  function checks(st, list, N, E, sheets) {
+    const out = { errors: [], warns: [], gp: {} };
+    if (N === 0) { out.errors.push('평가대상자가 없습니다.'); return out; }
+    if (N > 100) out.errors.push('평가대상자는 100명까지 처리할 수 있습니다.');
+    const need = minEvaluators(N);
+    if (E.length < need) out.errors.push(`평가대상자 ${N}명에는 다면평가자가 ${need}명 이상 필요합니다(현재 ${E.length}명).`);
+    // 순위 중복·누락 (평정자/확인자)
+    ['p', 'q'].forEach(w => {
+      const label = w === 'p' ? '평정자(교감)' : '확인자(교장)';
+      const rs = list.map(o => (w === 'p' ? o.gpP : o.gpQ).rank);
+      const seen = {}; rs.forEach(r => { if (r) seen[r] = (seen[r] || 0) + 1; });
+      const dup = Object.keys(seen).filter(k => seen[k] > 1);
+      const miss = []; for (let k = 1; k <= N; k++) if (!seen[k]) miss.push(k);
+      out.gp[w] = { dup: dup.map(Number), miss };
+      if (rs.some(r => r == null)) out.warns.push(`${label} 순위가 입력되지 않은 교사가 있습니다.`);
+      else {
+        if (dup.length) out.errors.push(`${label} 순위 중복: ${dup.join(', ')}`);
+        if (miss.length) out.errors.push(`${label} 순위 누락: ${miss.join(', ')}`);
+      }
+    });
+    const done = list.every(o => o.total != null);
+    out.done = done;
+    if (done) {
+      const cT = countGrades(list.map(o => o.gradeTotal));
+      const cA = countGrades(list.map(o => o.gradeAdj));
+      const cP = countGrades(list.map(o => o.gradeP));
+      const cQ = countGrades(list.map(o => o.gradeQ));
+      out.dist = { total: cT, adj: cA, p: cP, q: cQ, bj: baejeong(N) };
+      out.mismatch = list.filter(o => o.gradeTotal !== o.gradeAdj).map(o => o.id);
+      if (out.mismatch.length) out.errors.push('⑦총점 기준 등급과 ⑧조정점 기준 등급이 일치하지 않습니다(평정분포 비율 불일치).');
+      if (!distOK(cP, N)) out.errors.push('평정자(교감) 평정점의 수·우·미 분포가 배정표와 다릅니다.');
+      if (!distOK(cQ, N)) out.errors.push('확인자(교장) 평정점의 수·우·미 분포가 배정표와 다릅니다.');
+      const tots = list.map(o => o.total);
+      const ties = list.filter(o => tots.filter(t => t === o.total).length > 1).map(o => o.name);
+      if (ties.length) out.errors.push('합산 총점 동점자: ' + [...new Set(ties)].join(', ') + ' (합산점은 동일하지 않도록 해야 함)');
+      list.forEach(o => {
+        const d = o.person.discipline;
+        if (d === '징계' && ['수', '우'].includes(o.gradeTotal)) out.errors.push(`${o.name}: 징계(견책 이상)자는 '우' 이상 평정 불가`);
+        if (d === '불문경고' && o.gradeTotal === '수') out.errors.push(`${o.name}: 불문경고자는 '수' 평정 불가`);
+        [o.gpP, o.gpQ].forEach((g, k) => {
+          if (g.score > 100) out.errors.push(`${o.name}: ${k ? '확인자' : '평정자'} 평정점이 100점을 넘습니다.`);
+          g.el.forEach((v, j) => { if (v > GP_F[j] * 100 + 1e-9) out.errors.push(`${o.name}: ${k ? '확인자' : '평정자'} ${QUAL[j].short} 점수가 배점(${GP_F[j] * 100})을 넘습니다.`); });
+        });
+        if (o.gpTotal > 60) out.errors.push(`${o.name}: 근무성적평정 총점이 60점을 넘습니다.`);
+      });
+      if (list.some(o => o.gradeTotal === '양')) out.warns.push("'양' 평정자가 있습니다. 징계 등 사유가 있는 경우에만 부여하며 교육지원청 인사담당과 협의가 필요합니다.");
+    }
+    return out;
+  }
+
+  /** 수동조정 도우미: 등급이 어긋난 교사에 대해 현재 등급을 유지하면서 깎을 수 있는 폭 */
+  function adjustHint(o) {
+    const lo = s => s >= 95 ? 95 : s >= 90 ? 90 : s >= 85 ? 85 : 0;
+    const res = {};
+    if (o.total == null) return null;
+    const target = o.gradeAdj; // 맞춰야 할 등급
+    const band = { 수: [95, 100], 우: [90, 94.99], 미: [85, 89.99], 양: [0, 84.99] }[target];
+    res.target = target; res.band = band;
+    res.need = o.total > band[1] ? round(o.total - band[1], 2) : o.total < band[0] ? round(o.total - band[0], 2) : 0;
+    res.pRoom = o.gpP.score != null ? round(o.gpP.score - lo(o.gpP.score), 2) : null; // 평정점 기준 등급 유지 가능한 감점 폭
+    res.qRoom = o.gpQ.score != null ? round(o.gpQ.score - lo(o.gpQ.score), 2) : null;
+    const hi = s => s >= 95 ? 100 : s >= 90 ? 94.99 : s >= 85 ? 89.99 : 84.99;
+    res.pUp = o.gpP.score != null ? round(hi(o.gpP.score) - o.gpP.score, 2) : null; // 등급 유지하며 올릴 수 있는 폭
+    res.qUp = o.gpQ.score != null ? round(hi(o.gpQ.score) - o.gpQ.score, 2) : null;
+    res.pConvRoom = res.pRoom != null ? round(res.pRoom * 0.2, 2) : null;
+    res.qConvRoom = res.qRoom != null ? round(res.qRoom * 0.4, 2) : null;
+    return res;
+  }
+
+
+  /**
+   * 자동 수동조정: 순위(⑨)는 그대로 두고 평정자·확인자 요소 점수만 고쳐서
+   *  - 각 교사의 ⑦총점 등급 = ⑧조정점 기준 등급(순위 위치에 따른 등급)
+   *  - 총점 동점 없음(순위 순서대로 0.01점 이상 차이)
+   *  - 평정자·확인자 평정점은 각자 순위에 따른 등급 범위 안(→ 평정자·확인자 분포 = 배정표)
+   *  - 각 요소는 배점 이내
+   * 를 모두 만족시키되, 현재 점수에서 가장 적게 바꾸는 값을 찾는다.
+   */
+  function autoAdjust(st) {
+    const C = compute(st);
+    const N = C.N; const res = { ok: false, changes: [], fail: [], ov: {} };
+    if (!N) { res.fail.push('평가대상자가 없습니다.'); return res; }
+    if (C.list.some(o => o.dmTotal == null)) { res.fail.push('다면평가 점수가 없는 교사가 있습니다.'); return res; }
+    const g = C.checks.gp;
+    if (C.list.some(o => o.gpP.rank == null || o.gpQ.rank == null) || g.p.dup.length || g.p.miss.length || g.q.dup.length || g.q.miss.length) { res.fail.push('평정자·확인자 순위가 1~' + N + '위까지 빠짐·중복 없이 입력되어야 합니다.'); return res; }
+    const BAND = { 수: [95, 100], 우: [90, 94.99], 미: [85, 89.99], 양: [0, 84.99] };
+    const c100 = x => Math.round(x * 100);           // 0.01점 단위 정수
+    const conv = (s, f) => round(s * f, 2);
+    // 현재 총점 순서(동점이면 연번 순)
+    const ord = C.list.slice().sort((a, b) => b.total - a.total || a.idx - b.idx);
+    const info = ord.map((o, r) => {
+      const tg = grade(round(table(r + 1, N), 2));                 // ⑧ 기준 등급
+      const gpB = grade(o.gpP.auto.reduce((s, v) => s + v, 0)), gqB = grade(o.gpQ.auto.reduce((s, v) => s + v, 0));
+      const [pl, ph] = BAND[gpB], [ql, qh] = BAND[gqB];
+      let [tl, th] = BAND[tg];
+      const d = o.person.discipline;
+      if (d === '징계' && (tg === '수' || tg === '우')) res.fail.push(`${o.name}: 징계자는 '우' 이상 불가인데 순위상 '${tg}' 자리입니다. 교감·교장 순위를 낮추세요.`);
+      if (d === '불문경고' && tg === '수') res.fail.push(`${o.name}: 불문경고자는 '수' 불가인데 순위상 '수' 자리입니다. 교감·교장 순위를 낮추세요.`);
+      const minT = round(conv(pl, 0.2) + conv(ql, 0.4) + o.dmTotal, 2), maxT = round(conv(ph, 0.2) + conv(qh, 0.4) + o.dmTotal, 2);
+      return { o, tg, pl, ph, ql, qh, lo: c100(Math.max(tl, minT)), hi: c100(Math.min(th, maxT)), cur: c100(o.total) };
+    });
+    if (res.fail.length) return res;
+    // 순서가 정해진 목록에 대해 엄격한 내림차순 목표 총점 계산(위→아래 상한, 아래→위 하한)
+    const solve = arr => {
+      const U = [], L = [];
+      arr.forEach((x, i) => { U[i] = Math.min(x.hi, i ? U[i - 1] - 1 : Infinity); });
+      for (let i = arr.length - 1; i >= 0; i--) L[i] = Math.max(arr[i].lo, i < arr.length - 1 ? L[i + 1] + 1 : -Infinity);
+      if (arr.some((x, i) => L[i] > U[i])) return null;
+      let prev = Infinity; return arr.map((x, i) => { const T = Math.min(Math.max(x.cur, L[i]), U[i], prev - 1); prev = T; return T; });
+    };
+    let targets = solve(info);
+    let order = info;
+    if (!targets) {
+      // 2단계: 순위를 그대로 둘 수 없으면, 등급 자리(수 b0명·우 b1명·미 나머지)에 들어갈 수 있는 교사를 현재 총점 순으로 배정
+      const bj = baejeong(N); const slots = [['수', bj[0]], ['우', bj[1]], ['미', bj[2] + bj[3]]];
+      const feas = (x, gname) => { const [tl, th] = BAND[gname]; const lo = Math.max(c100(tl), x.minC), hi = Math.min(c100(th), x.maxC); return lo <= hi ? [lo, hi] : null; };
+      info.forEach(x => { x.minC = c100(round(conv(x.pl, 0.2) + conv(x.ql, 0.4) + x.o.dmTotal, 2)); x.maxC = c100(round(conv(x.ph, 0.2) + conv(x.qh, 0.4) + x.o.dmTotal, 2)); });
+      let rest = info.slice(); const groups = [];
+      for (const [gname, cnt] of slots) {
+        const cand = rest.filter(x => feas(x, gname) && !(gname !== '미' && x.o.person.discipline === '징계') && !(gname === '수' && x.o.person.discipline === '불문경고'));
+        // 아래 등급에 들어갈 수 없는 교사(최저점이 이 등급 하한 이상)를 먼저 배정
+        cand.sort((a, b) => (b.minC >= c100(BAND[gname][0]) ? 1 : 0) - (a.minC >= c100(BAND[gname][0]) ? 1 : 0) || b.cur - a.cur);
+        const pick = cand.slice(0, cnt);
+        if (pick.length < cnt) { res.fail.push(`'${gname}' 등급 자리 ${cnt}명을 채울 수 있는 교사가 부족합니다. 교감·교장 순위를 조정하세요.`); return res; }
+        groups.push(pick.map(x => { const [lo, hi] = feas(x, gname); return Object.assign({}, x, { lo, hi, tg: gname }); }).sort((a, b) => b.cur - a.cur));
+        rest = rest.filter(x => !pick.includes(x));
+      }
+      targets = []; order = [];
+      for (const gr of groups) {
+        let t = solve(gr); let arr = gr;
+        if (!t) { arr = gr.slice().sort((a, b) => b.hi - a.hi || b.cur - a.cur); t = solve(arr); }
+        if (!t) { res.fail.push(`'${arr[0].tg}' 등급 안에서 동점 없이 점수를 정할 수 없습니다. 교감·교장 순위를 조정하세요.`); return res; }
+        order = order.concat(arr); targets = targets.concat(t);
+      }
+      res.reordered = true;
+    }
+    if (order !== info) { const tmp = order.slice(); info.length = 0; tmp.forEach(x => info.push(x)); }
+    info.forEach((x, i) => {
+      const T = targets[i];
+      const o = x.o;
+      if (T === x.cur) return;
+      // T = conv(P,0.2)+conv(Q,0.4)+dm 를 만족하는 P,Q 중 현재와 가장 가까운 값
+      const need = T - c100(o.dmTotal);
+      const P0 = c100(o.gpP.score), Q0 = c100(o.gpQ.score);
+      let best = null;
+      for (let P = c100(x.pl); P <= c100(x.ph); P++) {
+        const qc = need - c100(conv(P / 100, 0.2));               // 필요한 확인자 환산점(0.01 단위)
+        const qBase = Math.round(qc / 0.4);
+        for (let Q = qBase - 2; Q <= qBase + 2; Q++) {
+          if (Q < c100(x.ql) || Q > c100(x.qh)) continue;
+          if (c100(conv(Q / 100, 0.4)) !== qc) continue;
+          const cost = Math.abs(P - P0) * 2 + Math.abs(Q - Q0) * 4 + (P !== P0 && Q !== Q0 ? 1 : 0);   // 총점 영향이 작고, 한 사람(평정자 또는 확인자)만 바꾸는 쪽 우선
+          if (!best || cost < best.cost) best = { P, Q, cost };
+        }
+      }
+      if (!best) { res.fail.push(`${o.name}: 목표 총점 ${T / 100}점을 만드는 평정자·확인자 점수를 찾지 못했습니다.`); return; }
+      const spread = (el, auto, target) => {
+        const out = el.slice(); let diff = round(target - out.reduce((s, v) => s + v, 0), 2);
+        for (const k of [1, 2, 4, 0, 3]) { if (!diff) break; const max = GP_F[k] * 100; const nv = Math.min(max, Math.max(0, round(out[k] + diff, 2))); diff = round(diff - (nv - out[k]), 2); out[k] = nv; }
+        return out.map((v, k) => v === auto[k] ? null : v);
+      };
+      res.ov[o.id] = { p: spread(o.gpP.el, o.gpP.auto, best.P / 100), q: spread(o.gpQ.el, o.gpQ.auto, best.Q / 100) };
+      res.changes.push({ id: o.id, name: o.name, rank: i + 1, oldRank: o.totalRank, grade: x.tg, p: [o.gpP.score, best.P / 100], q: [o.gpQ.score, best.Q / 100], total: [o.total, T / 100] });
+    });
+    // 순위대로 정리되지 않았던(이미 맞는) 교사 중 평정자·확인자 점수가 순위 등급 범위를 벗어난 경우도 바로잡기
+    info.forEach(x => {
+      const o = x.o; if (res.ov[o.id]) return;
+      const okP = o.gpP.score >= x.pl && o.gpP.score <= x.ph, okQ = o.gpQ.score >= x.ql && o.gpQ.score <= x.qh;
+      if (!okP || !okQ) res.fail.push(`${o.name}: 평정자·확인자 평정점이 순위에 따른 등급 범위를 벗어나 있습니다(수동조정 값 확인).`);
+    });
+    res.ok = !res.fail.length;
+    return res;
+  }
+
+  const API = { JG, BJ, table, baejeong, grade, minEvaluators, round, rounddown, add, QUAL, QUANT, GP_F,
+    qualFromScore, qualSheet, evalScope, aggregate, compute, countGrades, distOK, adjustHint, autoAdjust, targets, evaluators };
+  if (typeof module !== 'undefined') module.exports = API; else root.DM = API;
+})(this);
+
+</script>
+<script>
+const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>정성평가 — 다면평가자용<\/title>\n<style>\n*{box-sizing:border-box}body{margin:0;font-family:\"Malgun Gothic\",\"맑은 고딕\",\"Apple SD Gothic Neo\",sans-serif;font-size:14px;color:#1d2433;background:#f4f5f7;line-height:1.5}\n.wrap{max-width:1000px;margin:0 auto;padding:24px}\n.card{background:#fff;border:1px solid #d9dde4;border-radius:10px;padding:16px 18px;margin-bottom:14px}\nh1{font-size:19px;margin:0 0 4px}.sub{color:#667085;margin:0}\ntable{border-collapse:collapse;width:100%}th,td{border:1px solid #d9dde4;padding:5px 6px;text-align:center}th{background:#f2f4f7;font-size:13px}\ntd.r{text-align:right;font-variant-numeric:tabular-nums}tr.self td{background:#f7f7f7;color:#98a2b3}\ninput.rk{width:60px;text-align:center;font-weight:700;font-size:15px;border:1px solid #c5cbd5;border-radius:6px;padding:4px}\ninput.rk.bad{background:#fdecea;border-color:#f3a59c}\n.btn{border:1px solid #d9dde4;background:#fff;border-radius:6px;padding:8px 14px;cursor:pointer;font:inherit}\n.btn.pri{background:#1f4e8c;border-color:#1f4e8c;color:#fff}.btn:disabled{opacity:.45;cursor:not-allowed}\n.msg{border-radius:8px;padding:9px 12px;margin:8px 0}.err{background:#fdecea;color:#b42318}.ok{background:#e7f5ec;color:#1a7f45}.info{background:#e9f0fa;color:#1d3d6b}\n.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sp{flex:1}\nol{margin:6px 0 0;padding-left:20px}\n#paper{display:none}\n@media print{\n  @page{size:A4;margin:14mm 12mm}\n  body{background:#fff}.wrap{display:none}#paper{display:block;color:#000;font-size:10pt}\n  #paper h2{text-align:center;font-size:14pt;margin:2mm 0 4mm}\n  #paper th,#paper td{border:1px solid #000;font-size:9.5pt;padding:1.5mm 1mm}\n  #paper th{background:#f3f3f3 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}\n  .remark{font-size:8.5pt;white-space:pre-line;border:1px solid #000;padding:2mm 3mm;margin-top:3mm}\n}\n<\/style><\/head><body>\n<div class=\"wrap\" id=\"ui\"><\/div>\n<div id=\"paper\"><\/div>\n<script>\n/* =====================================================================\n * 다면평가·근무성적평정 계산 엔진\n * - 2025학년도 초등학교 다면평가프로그램(최종).xlsm 의 수식을 그대로 옮김\n * - 조견표(순위→점수)와 근무성적평정점 분포비율 및 인원 배정표(시행공문 붙임4) 내장\n * ===================================================================== */\n(function (root) {\n  'use strict';\n\n  // ── 조견표: 평가(평정)대상자 수 N(1~100)별 순위→점수. [시작값, 증분, 개수] 구간으로 압축 저장\n  const JG_ENC = [[[100,0,1]],[[100,-5.5,2]],[[100,-5.5,2],[89.5,0,1]],[[100,-5.5,2],[94,-4.5,2]],[[100,-0.5,2],[94.5,-0.5,2],[89.5,0,1]],[[100,-0.5,2],[94.5,-0.5,2],[89.5,-0.5,2]],[[100,-0.5,2],[94.5,-0.5,3],[89.5,-0.5,2]],[[100,-0.5,3],[94.5,-0.5,3],[89.5,-0.5,2]],[[100,-0.5,3],[94.5,-0.5,3],[89.5,-0.5,3]],[[100,-0.5,3],[94.5,-0.5,4],[89.5,-0.5,3]],[[100,-0.5,3],[94.5,-0.5,5],[89.5,-0.5,3]],[[100,-0.5,4],[94.5,-0.5,5],[89.5,-0.5,3]],[[100,-0.5,4],[94.5,-0.5,5],[89.5,-0.5,4]],[[100,-0.5,4],[94.5,-0.5,6],[89.5,-0.5,4]],[[100,-0.5,5],[94.5,-0.5,6],[89.5,-0.5,4]],[[100,-0.5,5],[94.5,-0.5,6],[89.5,-0.5,5]],[[100,-0.5,5],[94.5,-0.5,7],[89.5,-0.5,5]],[[100,-0.5,6],[94.5,-0.5,7],[89.5,-0.5,5]],[[100,-0.5,6],[94.5,-0.5,7],[89.5,-0.5,6]],[[100,-0.5,6],[94.5,-0.5,8],[89.5,-0.5,6]],[[100,-0.5,6],[94.5,-0.5,9],[89.5,-0.5,6]],[[100,-0.5,7],[94.5,-0.5,9],[89.5,-0.5,6]],[[100,-0.5,7],[94.5,-0.5,9],[89.5,-0.5,7]],[[100,-0.5,7],[94.5,-0.5,17]],[[100,-0.5,8],[94.5,-0.5,17]],[[100,-0.5,8],[94.5,-0.5,18]],[[100,-0.5,8],[94.546,-0.454,11],[89.5,-0.5,8]],[[100,-0.5,9],[94.546,-0.454,11],[89.5,-0.5,8]],[[100,-0.5,9],[94.546,-0.454,11],[89.5,-0.5,9]],[[100,-0.5,9],[94.583,-0.417,12],[89.5,-0.5,9]],[[100,-0.5,9],[94.615,-0.385,12],[90,-0.5,10]],[[100,-0.5,10],[94.615,-0.385,12],[90,-0.5,10]],[[100,-0.5,10],[94.615,-0.385,12],[90,-0.5,11]],[[100,-0.5,10],[94.643,-0.357,14],[89.5,-0.5,10]],[[100,-0.45,2],[99.09,-0.45,2],[98.18,-0.45,3],[96.82,-0.45,2],[95.91,-0.45,2],[94.643,-0.357,14],[89.5,-0.5,10]],[[100,-0.45,2],[99.09,-0.45,2],[98.18,-0.45,3],[96.82,-0.45,2],[95.91,-0.45,2],[94.643,-0.357,14],[89.546,-0.454,10],[85.01,0,1]],[[100,-0.45,2],[99.09,-0.45,2],[98.18,-0.45,3],[96.82,-0.45,2],[95.91,-0.45,2],[94.667,-0.333,15],[89.546,-0.454,10],[85.01,0,1]],[[100,-0.417,12],[94.667,-0.333,15],[89.546,-0.454,10],[85.01,0,1]],[[100,-0.417,12],[94.667,-0.333,15],[89.583,-0.417,12]],[[100,-0.417,12],[94.688,-0.312,16],[89.583,-0.417,12]],[[100,-0.417,12],[94.706,-0.294,17],[89.583,-0.417,12]],[[100,-0.385,13],[94.706,-0.294,17],[89.583,-0.417,12]],[[100,-0.385,13],[94.706,-0.294,17],[89.615,-0.385,12],[85,0,1]],[[100,-0.385,13],[94.723,-0.277,18],[89.615,-0.385,12],[85,0,1]],[[100,-0.357,14],[94.723,-0.277,18],[89.615,-0.385,12],[85,0,1]],[[100,-0.357,14],[94.723,-0.277,18],[89.643,-0.357,14]],[[100,-0.357,14],[94.737,-0.263,19],[89.643,-0.357,14]],[[100,-0.333,15],[94.737,-0.263,19],[89.643,-0.357,14]],[[100,-0.333,15],[94.737,-0.263,19],[89.667,-0.333,15]],[[100,-0.333,15],[94.75,-0.25,20],[89.667,-0.333,15]],[[100,-0.333,15],[94.762,-0.238,21],[89.667,-0.333,15]],[[100,-0.312,16],[94.762,-0.238,21],[89.667,-0.333,15]],[[100,-0.312,16],[94.762,-0.238,21],[89.688,-0.312,16]],[[100,-0.312,16],[94.773,-0.227,22],[89.688,-0.312,16]],[[100,-0.294,17],[94.773,-0.227,22],[89.688,-0.312,16]],[[100,-0.294,17],[94.773,-0.227,22],[89.706,-0.294,17]],[[100,-0.294,17],[94.783,-0.217,23],[89.706,-0.294,17]],[[100,-0.277,18],[94.783,-0.217,23],[89.706,-0.294,17]],[[100,-0.277,18],[94.783,-0.217,23],[89.723,-0.277,18]],[[100,-0.277,18],[94.792,-0.208,24],[89.723,-0.277,18]],[[100,-0.277,18],[94.8,-0.2,25],[89.723,-0.277,18]],[[100,-0.263,19],[94.8,-0.2,25],[89.723,-0.277,18]],[[100,-0.263,19],[94.8,-0.2,25],[89.737,-0.263,19]],[[100,-0.263,19],[94.808,-0.192,26],[89.737,-0.263,19]],[[100,-0.25,20],[94.808,-0.192,26],[89.737,-0.263,19]],[[100,-0.25,20],[94.808,-0.192,26],[89.75,-0.25,20]],[[100,-0.25,20],[94.815,-0.185,27],[89.75,-0.25,20]],[[100,-0.238,21],[94.815,-0.185,27],[89.75,-0.25,20]],[[100,-0.238,21],[94.815,-0.185,27],[89.762,-0.238,21]],[[100,-0.238,21],[94.822,-0.178,28],[89.762,-0.238,21]],[[100,-0.238,21],[94.828,-0.172,29],[89.762,-0.238,21]],[[100,-0.227,22],[94.828,-0.172,29],[89.762,-0.238,21]],[[100,-0.227,22],[94.828,-0.172,29],[89.773,-0.227,22]],[[100,-0.227,22],[94.834,-0.166,30],[89.773,-0.227,22]],[[100,-0.217,23],[94.834,-0.166,30],[89.773,-0.227,22]],[[100,-0.217,23],[94.834,-0.166,30],[89.783,-0.217,23]],[[100,-0.217,23],[94.839,-0.161,31],[89.783,-0.217,23]],[[100,-0.208,24],[94.839,-0.161,31],[89.783,-0.217,23]],[[100,-0.208,24],[94.839,-0.161,31],[89.792,-0.208,24]],[[100,-0.208,24],[94.844,-0.156,32],[89.792,-0.208,24]],[[100,-0.208,24],[94.849,-0.151,33],[89.792,-0.208,24]],[[100,-0.2,25],[94.849,-0.151,33],[89.792,-0.208,24]],[[100,-0.2,25],[94.849,-0.151,33],[89.8,-0.2,25]],[[100,-0.2,25],[94.853,-0.147,34],[89.8,-0.2,25]],[[100,-0.192,26],[94.853,-0.147,34],[89.8,-0.2,25]],[[100,-0.192,26],[94.853,-0.147,34],[89.808,-0.192,26]],[[100,-0.192,26],[94.858,-0.142,35],[89.808,-0.192,26]],[[100,-0.185,27],[94.858,-0.142,35],[89.808,-0.192,26]],[[100,-0.185,27],[94.858,-0.142,35],[89.815,-0.185,27]],[[100,-0.185,27],[94.862,-0.138,36],[89.815,-0.185,27]],[[100,-0.185,27],[94.865,-0.135,37],[89.815,-0.185,27]],[[100,-0.178,28],[94.865,-0.135,37],[89.815,-0.185,27]],[[100,-0.178,28],[94.865,-0.135,37],[89.822,-0.178,28]],[[100,-0.178,28],[94.869,-0.131,38],[89.822,-0.178,28]],[[100,-0.172,29],[94.869,-0.131,38],[89.822,-0.178,28]],[[100,-0.172,29],[94.869,-0.131,38],[89.828,-0.172,29]],[[100,-0.172,29],[94.872,-0.128,39],[89.828,-0.172,29]],[[100,-0.166,30],[94.872,-0.128,39],[89.828,-0.172,29]],[[100,-0.166,30],[94.872,-0.128,39],[89.834,-0.166,30]],[[100,-0.166,30],[94.875,-0.125,40],[89.834,-0.166,30]]];\n\n  // ── 시행공문 붙임4 「근무성적평정점 분포비율 및 인원 배정표」 [수, 우, 미, 양] (N=1~100)\n  const BJ = [[1,0,0,0],[1,1,0,0],[1,1,1,0],[1,2,1,0],[2,2,1,0],[2,2,1,1],[2,3,1,1],[3,3,1,1],[3,3,2,1],[3,4,2,1],[3,5,2,1],[4,5,2,1],[4,5,3,1],[4,6,3,1],[5,6,3,1],[5,6,3,2],[5,7,3,2],[6,7,3,2],[6,7,4,2],[6,8,4,2],[6,9,4,2],[7,9,4,2],[7,9,5,2],[7,10,5,2],[8,10,5,2],[8,10,5,3],[8,11,5,3],[9,11,5,3],[9,11,6,3],[9,12,6,3],[9,13,6,3],[10,13,6,3],[10,13,7,3],[10,14,7,3],[11,14,7,3],[11,14,7,4],[11,15,7,4],[12,15,7,4],[12,15,8,4],[12,16,8,4],[12,17,8,4],[13,17,8,4],[13,17,9,4],[13,18,9,4],[14,18,9,4],[14,18,9,5],[14,19,9,5],[15,19,9,5],[15,19,10,5],[15,20,10,5],[15,21,10,5],[16,21,10,5],[16,21,11,5],[16,22,11,5],[17,22,11,5],[17,22,11,6],[17,23,11,6],[18,23,11,6],[18,23,12,6],[18,24,12,6],[18,25,12,6],[19,25,12,6],[19,25,13,6],[19,26,13,6],[20,26,13,6],[20,26,13,7],[20,27,13,7],[21,27,13,7],[21,27,14,7],[21,28,14,7],[21,29,14,7],[22,29,14,7],[22,29,15,7],[22,30,15,7],[23,30,15,7],[23,30,15,8],[23,31,15,8],[24,31,15,8],[24,31,16,8],[24,32,16,8],[24,33,16,8],[25,33,16,8],[25,33,17,8],[25,34,17,8],[26,34,17,8],[26,34,17,9],[26,35,17,9],[27,35,17,9],[27,35,18,9],[27,36,18,9],[27,37,18,9],[28,37,18,9],[28,37,19,9],[28,38,19,9],[29,38,19,9],[29,38,19,10],[29,39,19,10],[30,39,19,10],[30,39,20,10],[30,40,20,10]];\n\n  const JG = JG_ENC.map(segs => {\n    const col = [];\n    segs.forEach(([a, d, n]) => { for (let k = 0; k < n; k++) col.push(Math.round((a + d * k) * 1000) / 1000); });\n    return col;\n  });\n\n  // ── 엑셀 ROUND / ROUNDDOWN 과 같은 결과를 내도록(부동소수 오차 제거 후 처리)\n  const clean = x => Number(Number(x).toPrecision(12));\n  function round(x, d = 2) { const m = 10 ** d; const v = clean(Math.abs(x) * m); return Math.sign(x) * Math.round(v) / m; }\n  function rounddown(x, d = 2) { const m = 10 ** d; const v = clean(Math.abs(x) * m); return Math.sign(x) * Math.floor(v) / m; }\n  const add = (...a) => round(a.reduce((s, v) => s + (Number(v) || 0), 0), 3);\n\n  /** 조견표 점수: N명 중 rank위 */\n  function table(rank, N) {\n    if (!(N >= 1 && N <= 100)) return null;\n    if (!(rank >= 1)) return null;\n    const r = Math.min(Math.round(rank), N);  // 엑셀: 순위가 대상자 수보다 크면 대상자 수로 처리\n    return JG[N - 1][r - 1];\n  }\n  function baejeong(N) { return N >= 1 && N <= 100 ? BJ[N - 1].slice() : null; }\n  function grade(s) { if (s == null || s === '' || isNaN(s)) return ''; s = clean(s); return s >= 95 ? '수' : s >= 90 ? '우' : s >= 85 ? '미' : '양'; }\n  /** 승진규정 제28조의4: 평가대상자 수별 최소 다면평가자 수 */\n  function minEvaluators(N) { return N <= 15 ? 3 : N <= 20 ? 4 : N <= 25 ? 5 : N <= 30 ? 6 : N <= 35 ? 7 : 8; }\n\n  // 정성평가 요소: [이름, 배점, 조견표점수에 곱하는 계수]  (학습지도는 총점-나머지)\n  const QUAL = [\n    { key: 'att', name: '교육공무원으로서의 태도', short: '태도', max: 10, f: 0.1 },\n    { key: 'learn', name: '학습지도', short: '학습지도', max: 40, f: null },\n    { key: 'life', name: '생활지도', short: '생활지도', max: 30, f: 0.3 },\n    { key: 'pro', name: '전문성개발', short: '전문성개발', max: 5, f: 0.05 },\n    { key: 'duty', name: '담당업무', short: '담당업무', max: 15, f: 0.15 }\n  ];\n  const QUANT = [\n    { key: 'learn', name: '학습지도', max: 30 },\n    { key: 'life', name: '생활지도', max: 30 },\n    { key: 'pro', name: '전문성개발', max: 10 },\n    { key: 'duty', name: '담당업무', max: 30 }\n  ];\n  // 근무성적평정 요소 계수(평정점 100점 기준)\n  const GP_F = [0.1, 0.4, 0.3, 0.05, 0.15];\n\n  /** [서식1] 다면평가자 1명이 매긴 한 사람의 요소별 점수 — 평가자평가표 C~H열 */\n  function qualFromScore(t) {\n    if (t == null || t === '' || isNaN(t)) return null;\n    const total = round(t, 2);\n    const att = round(t / 10, 2), life = round(t / 10 * 3, 2), pro = round(t / 10 * 0.5, 2), duty = round(t / 10 * 1.5, 2);\n    const learn = round(total - att - life - pro - duty, 2);\n    return { el: [att, learn, life, pro, duty], total };\n  }\n\n  function targets(st) { return st.people.filter(p => p.target && p.name); }\n  function evaluators(st) { return st.people.filter(p => p.evaluator && p.name); }\n\n  /** 다면평가자 한 명이 평가해야 할 대상자(본인 제외)와 실평가대상자 수 */\n  function evalScope(st, evId) {\n    const list = targets(st).filter(p => p.id !== evId);\n    return { list, N: list.length };\n  }\n\n  /** 다면평가자 한 명의 서식1 행 */\n  function qualSheet(st, evId) {\n    const { list, N } = evalScope(st, evId);\n    const q = (st.qual && st.qual[evId]) || {};\n    const direct = q.mode === 'score';\n    const rows = list.map(p => {\n      let rank = q.ranks ? q.ranks[p.id] : null;\n      rank = rank === '' || rank == null ? null : Number(rank);\n      let raw = null;\n      if (direct) { const s = q.scores ? q.scores[p.id] : null; raw = s === '' || s == null ? null : Number(s); }\n      else if (rank) raw = table(rank, N);\n      const r = qualFromScore(raw);\n      return { id: p.id, name: p.name, rank, raw, el: r ? r.el : null, total: r ? r.total : null };\n    });\n    // 점검\n    const issues = [];\n    if (!direct) {\n      const seen = {};\n      rows.forEach(r => { if (r.rank) seen[r.rank] = (seen[r.rank] || 0) + 1; });\n      rows.forEach(r => {\n        r.dup = r.rank && seen[r.rank] > 1;\n        r.bad = r.rank != null && (!(r.rank >= 1 && r.rank <= N) || !Number.isInteger(r.rank));\n      });\n      const missing = []; for (let k = 1; k <= N; k++) if (!seen[k]) missing.push(k);\n      if (rows.some(r => r.rank == null)) issues.push('순위를 입력하지 않은 대상자가 있습니다.');\n      if (rows.some(r => r.dup)) issues.push('중복된 순위가 있습니다.');\n      if (rows.some(r => r.bad)) issues.push(`순위는 1~${N} 사이의 정수여야 합니다.`);\n      if (!issues.length && missing.length) issues.push('누락된 순위: ' + missing.join(', '));\n    } else {\n      rows.forEach(r => { r.bad = r.raw != null && (r.raw < 85 || r.raw > 100); });\n      if (rows.some(r => r.raw == null)) issues.push('점수를 입력하지 않은 대상자가 있습니다.');\n      if (rows.some(r => r.bad)) issues.push('직접 입력 점수는 85~100점 범위여야 합니다.');\n      const tot = rows.filter(r => r.total != null).map(r => r.total);\n      if (new Set(tot).size !== tot.length) issues.push('동점이 있습니다(특별한 사정이 없으면 동점을 주지 않음).');\n    }\n    rows.forEach(r => { if (r.el && r.el[1] > 40) issues.push(`${r.name}: 학습지도 점수가 40점을 넘습니다.`); });\n    const complete = rows.length > 0 && rows.every(r => r.total != null) && !issues.length;\n    return { N, rows, issues, complete, direct };\n  }\n\n  /** [서식1-1] 요소별 집계: 최고·최저 제외(평가자 4인 이상), 평균 */\n  function aggregate(vals) {\n    const v = vals.filter(x => x != null);\n    const cnt = v.length;\n    if (!cnt) return { cnt, sum: null, avg: null, max: null, min: null };\n    const s = add(...v), mx = Math.max(...v), mn = Math.min(...v);\n    const sum = cnt < 4 ? s : add(s, -mx, -mn);\n    const avg = cnt < 4 ? round(sum / cnt, 2) : round(sum / (cnt - 2), 2);\n    return { cnt, sum, avg, max: mx, min: mn, dropped: cnt >= 4 };\n  }\n\n  function rates(st, mode) {\n    if (mode === 'perf') return { qual: Number(st.perfRate?.qual ?? 20), quant: Number(st.perfRate?.quant ?? 80) };\n    return { qual: 32, quant: 8 };\n  }\n\n  /** 전체 계산 */\n  function compute(st, mode = 'promo') {\n    const T = targets(st), E = evaluators(st);\n    const N = T.length;\n    const R = rates(st, mode);\n    const sheets = {}; E.forEach(e => { sheets[e.id] = qualSheet(st, e.id); });\n    const byId = {};\n    T.forEach((p, i) => {\n      const o = { id: p.id, idx: i + 1, name: p.name, person: p };\n      // 정성: 요소별 다면평가자 점수\n      o.qualBy = E.map(e => { const r = sheets[e.id].rows.find(x => x.id === p.id); return r && r.el ? r.el : null; });\n      o.qualAgg = QUAL.map((q, k) => aggregate(o.qualBy.map(el => el ? el[k] : null)));\n      const qAvgs = o.qualAgg.map(a => a.avg);\n      o.qualEl = qAvgs;\n      o.qualTotal = qAvgs.every(v => v != null) ? add(...qAvgs) : null;\n      o.qualConv = o.qualTotal != null ? round(o.qualTotal * R.qual / 100, 2) : null;\n      // 정량\n      const qn = (st.quant && st.quant[p.id]) || [];\n      o.quantEl = QUANT.map((q, k) => (qn[k] === '' || qn[k] == null) ? null : Number(qn[k]));\n      o.quantTotal = o.quantEl.every(v => v != null) ? add(...o.quantEl) : null;\n      o.quantConv = o.quantTotal != null ? round(o.quantTotal * R.quant / 100, 2) : null;\n      // 다면 합산\n      o.dmTotal = (o.qualConv != null && o.quantConv != null) ? add(o.qualConv, o.quantConv) : null;\n      // 근무성적평정\n      const g = (st.gp && st.gp[p.id]) || {};\n      const mk = (who) => {\n        const rk = g[who] === '' || g[who] == null ? null : Number(g[who]);\n        const base = rk ? table(rk, N) : null;\n        const auto = GP_F.map(f => base == null ? null : rounddown(base * f, 2));\n        const ov = (g.ov && g.ov[who]) || [];\n        const el = auto.map((v, k) => (ov[k] === '' || ov[k] == null) ? v : Number(ov[k]));\n        const score = el.every(v => v != null) ? add(...el) : null;\n        const conv = score == null ? null : round(score * (who === 'p' ? 0.2 : 0.4), 2);\n        return { rank: rk, base, auto, el, manual: ov.some(v => v !== '' && v != null), score, conv };\n      };\n      o.gpP = mk('p'); o.gpQ = mk('q');\n      o.gpTotal = (o.gpP.conv != null && o.gpQ.conv != null) ? add(o.gpP.conv, o.gpQ.conv) : null;\n      o.total = (o.gpTotal != null && o.dmTotal != null) ? add(o.gpP.conv, o.gpQ.conv, o.dmTotal) : null;\n      byId[p.id] = o;\n    });\n    const list = T.map(p => byId[p.id]);\n    // 순위 (엑셀 RANK: 내림차순, 동점은 같은 순위)\n    const rk = (key) => { const vals = list.map(o => o[key]).filter(v => v != null); list.forEach(o => { o[key + 'Rank'] = o[key] == null ? null : 1 + vals.filter(v => v > o[key]).length; }); };\n    rk('total'); rk('dmTotal'); rk('qualTotal'); rk('quantTotal'); rk('gpTotal');\n    list.forEach(o => {\n      // ⑧ 조정점(참고값: 실제 조정점은 교육지원청 작성). 엑셀 조견표의 부동소수 오차(예: 30명 21위 89.996)로\n      //    배정표와 어긋나는 일이 없도록 소수 둘째 자리로 반올림해 등급을 판정\n      o.adj = o.totalRank ? round(table(o.totalRank, N), 2) : null;\n      o.gradeAdj = grade(o.adj);\n      o.gradeTotal = grade(o.total);\n      o.gradeP = grade(o.gpP.score); o.gradeQ = grade(o.gpQ.score);\n    });\n    return { N, list, byId, sheets, E, T, R, mode, checks: checks(st, list, N, E, sheets) };\n  }\n\n  function countGrades(arr) {\n    const c = { 수: 0, 우: 0, 미: 0, 양: 0 };\n    arr.forEach(g => { if (c[g] != null) c[g]++; });\n    return c;\n  }\n  /** 배정표와 비교(양은 미에 포함 가능) */\n  function distOK(c, N) {\n    const b = baejeong(N); if (!b) return false;\n    return c.수 === b[0] && c.우 === b[1] && (c.미 + c.양) === (b[2] + b[3]);\n  }\n\n  function checks(st, list, N, E, sheets) {\n    const out = { errors: [], warns: [], gp: {} };\n    if (N === 0) { out.errors.push('평가대상자가 없습니다.'); return out; }\n    if (N > 100) out.errors.push('평가대상자는 100명까지 처리할 수 있습니다.');\n    const need = minEvaluators(N);\n    if (E.length < need) out.errors.push(`평가대상자 ${N}명에는 다면평가자가 ${need}명 이상 필요합니다(현재 ${E.length}명).`);\n    // 순위 중복·누락 (평정자/확인자)\n    ['p', 'q'].forEach(w => {\n      const label = w === 'p' ? '평정자(교감)' : '확인자(교장)';\n      const rs = list.map(o => (w === 'p' ? o.gpP : o.gpQ).rank);\n      const seen = {}; rs.forEach(r => { if (r) seen[r] = (seen[r] || 0) + 1; });\n      const dup = Object.keys(seen).filter(k => seen[k] > 1);\n      const miss = []; for (let k = 1; k <= N; k++) if (!seen[k]) miss.push(k);\n      out.gp[w] = { dup: dup.map(Number), miss };\n      if (rs.some(r => r == null)) out.warns.push(`${label} 순위가 입력되지 않은 교사가 있습니다.`);\n      else {\n        if (dup.length) out.errors.push(`${label} 순위 중복: ${dup.join(', ')}`);\n        if (miss.length) out.errors.push(`${label} 순위 누락: ${miss.join(', ')}`);\n      }\n    });\n    const done = list.every(o => o.total != null);\n    out.done = done;\n    if (done) {\n      const cT = countGrades(list.map(o => o.gradeTotal));\n      const cA = countGrades(list.map(o => o.gradeAdj));\n      const cP = countGrades(list.map(o => o.gradeP));\n      const cQ = countGrades(list.map(o => o.gradeQ));\n      out.dist = { total: cT, adj: cA, p: cP, q: cQ, bj: baejeong(N) };\n      out.mismatch = list.filter(o => o.gradeTotal !== o.gradeAdj).map(o => o.id);\n      if (out.mismatch.length) out.errors.push('⑦총점 기준 등급과 ⑧조정점 기준 등급이 일치하지 않습니다(평정분포 비율 불일치).');\n      if (!distOK(cP, N)) out.errors.push('평정자(교감) 평정점의 수·우·미 분포가 배정표와 다릅니다.');\n      if (!distOK(cQ, N)) out.errors.push('확인자(교장) 평정점의 수·우·미 분포가 배정표와 다릅니다.');\n      const tots = list.map(o => o.total);\n      const ties = list.filter(o => tots.filter(t => t === o.total).length > 1).map(o => o.name);\n      if (ties.length) out.errors.push('합산 총점 동점자: ' + [...new Set(ties)].join(', ') + ' (합산점은 동일하지 않도록 해야 함)');\n      list.forEach(o => {\n        const d = o.person.discipline;\n        if (d === '징계' && ['수', '우'].includes(o.gradeTotal)) out.errors.push(`${o.name}: 징계(견책 이상)자는 '우' 이상 평정 불가`);\n        if (d === '불문경고' && o.gradeTotal === '수') out.errors.push(`${o.name}: 불문경고자는 '수' 평정 불가`);\n        [o.gpP, o.gpQ].forEach((g, k) => {\n          if (g.score > 100) out.errors.push(`${o.name}: ${k ? '확인자' : '평정자'} 평정점이 100점을 넘습니다.`);\n          g.el.forEach((v, j) => { if (v > GP_F[j] * 100 + 1e-9) out.errors.push(`${o.name}: ${k ? '확인자' : '평정자'} ${QUAL[j].short} 점수가 배점(${GP_F[j] * 100})을 넘습니다.`); });\n        });\n        if (o.gpTotal > 60) out.errors.push(`${o.name}: 근무성적평정 총점이 60점을 넘습니다.`);\n      });\n      if (list.some(o => o.gradeTotal === '양')) out.warns.push(\"'양' 평정자가 있습니다. 징계 등 사유가 있는 경우에만 부여하며 교육지원청 인사담당과 협의가 필요합니다.\");\n    }\n    return out;\n  }\n\n  /** 수동조정 도우미: 등급이 어긋난 교사에 대해 현재 등급을 유지하면서 깎을 수 있는 폭 */\n  function adjustHint(o) {\n    const lo = s => s >= 95 ? 95 : s >= 90 ? 90 : s >= 85 ? 85 : 0;\n    const res = {};\n    if (o.total == null) return null;\n    const target = o.gradeAdj; // 맞춰야 할 등급\n    const band = { 수: [95, 100], 우: [90, 94.99], 미: [85, 89.99], 양: [0, 84.99] }[target];\n    res.target = target; res.band = band;\n    res.need = o.total > band[1] ? round(o.total - band[1], 2) : o.total < band[0] ? round(o.total - band[0], 2) : 0;\n    res.pRoom = o.gpP.score != null ? round(o.gpP.score - lo(o.gpP.score), 2) : null; // 평정점 기준 등급 유지 가능한 감점 폭\n    res.qRoom = o.gpQ.score != null ? round(o.gpQ.score - lo(o.gpQ.score), 2) : null;\n    const hi = s => s >= 95 ? 100 : s >= 90 ? 94.99 : s >= 85 ? 89.99 : 84.99;\n    res.pUp = o.gpP.score != null ? round(hi(o.gpP.score) - o.gpP.score, 2) : null; // 등급 유지하며 올릴 수 있는 폭\n    res.qUp = o.gpQ.score != null ? round(hi(o.gpQ.score) - o.gpQ.score, 2) : null;\n    res.pConvRoom = res.pRoom != null ? round(res.pRoom * 0.2, 2) : null;\n    res.qConvRoom = res.qRoom != null ? round(res.qRoom * 0.4, 2) : null;\n    return res;\n  }\n\n\n  /**\n   * 자동 수동조정: 순위(⑨)는 그대로 두고 평정자·확인자 요소 점수만 고쳐서\n   *  - 각 교사의 ⑦총점 등급 = ⑧조정점 기준 등급(순위 위치에 따른 등급)\n   *  - 총점 동점 없음(순위 순서대로 0.01점 이상 차이)\n   *  - 평정자·확인자 평정점은 각자 순위에 따른 등급 범위 안(→ 평정자·확인자 분포 = 배정표)\n   *  - 각 요소는 배점 이내\n   * 를 모두 만족시키되, 현재 점수에서 가장 적게 바꾸는 값을 찾는다.\n   */\n  function autoAdjust(st) {\n    const C = compute(st);\n    const N = C.N; const res = { ok: false, changes: [], fail: [], ov: {} };\n    if (!N) { res.fail.push('평가대상자가 없습니다.'); return res; }\n    if (C.list.some(o => o.dmTotal == null)) { res.fail.push('다면평가 점수가 없는 교사가 있습니다.'); return res; }\n    const g = C.checks.gp;\n    if (C.list.some(o => o.gpP.rank == null || o.gpQ.rank == null) || g.p.dup.length || g.p.miss.length || g.q.dup.length || g.q.miss.length) { res.fail.push('평정자·확인자 순위가 1~' + N + '위까지 빠짐·중복 없이 입력되어야 합니다.'); return res; }\n    const BAND = { 수: [95, 100], 우: [90, 94.99], 미: [85, 89.99], 양: [0, 84.99] };\n    const c100 = x => Math.round(x * 100);           // 0.01점 단위 정수\n    const conv = (s, f) => round(s * f, 2);\n    // 현재 총점 순서(동점이면 연번 순)\n    const ord = C.list.slice().sort((a, b) => b.total - a.total || a.idx - b.idx);\n    const info = ord.map((o, r) => {\n      const tg = grade(round(table(r + 1, N), 2));                 // ⑧ 기준 등급\n      const gpB = grade(o.gpP.auto.reduce((s, v) => s + v, 0)), gqB = grade(o.gpQ.auto.reduce((s, v) => s + v, 0));\n      const [pl, ph] = BAND[gpB], [ql, qh] = BAND[gqB];\n      let [tl, th] = BAND[tg];\n      const d = o.person.discipline;\n      if (d === '징계' && (tg === '수' || tg === '우')) res.fail.push(`${o.name}: 징계자는 '우' 이상 불가인데 순위상 '${tg}' 자리입니다. 교감·교장 순위를 낮추세요.`);\n      if (d === '불문경고' && tg === '수') res.fail.push(`${o.name}: 불문경고자는 '수' 불가인데 순위상 '수' 자리입니다. 교감·교장 순위를 낮추세요.`);\n      const minT = round(conv(pl, 0.2) + conv(ql, 0.4) + o.dmTotal, 2), maxT = round(conv(ph, 0.2) + conv(qh, 0.4) + o.dmTotal, 2);\n      return { o, tg, pl, ph, ql, qh, lo: c100(Math.max(tl, minT)), hi: c100(Math.min(th, maxT)), cur: c100(o.total) };\n    });\n    if (res.fail.length) return res;\n    // 순서가 정해진 목록에 대해 엄격한 내림차순 목표 총점 계산(위→아래 상한, 아래→위 하한)\n    const solve = arr => {\n      const U = [], L = [];\n      arr.forEach((x, i) => { U[i] = Math.min(x.hi, i ? U[i - 1] - 1 : Infinity); });\n      for (let i = arr.length - 1; i >= 0; i--) L[i] = Math.max(arr[i].lo, i < arr.length - 1 ? L[i + 1] + 1 : -Infinity);\n      if (arr.some((x, i) => L[i] > U[i])) return null;\n      let prev = Infinity; return arr.map((x, i) => { const T = Math.min(Math.max(x.cur, L[i]), U[i], prev - 1); prev = T; return T; });\n    };\n    let targets = solve(info);\n    let order = info;\n    if (!targets) {\n      // 2단계: 순위를 그대로 둘 수 없으면, 등급 자리(수 b0명·우 b1명·미 나머지)에 들어갈 수 있는 교사를 현재 총점 순으로 배정\n      const bj = baejeong(N); const slots = [['수', bj[0]], ['우', bj[1]], ['미', bj[2] + bj[3]]];\n      const feas = (x, gname) => { const [tl, th] = BAND[gname]; const lo = Math.max(c100(tl), x.minC), hi = Math.min(c100(th), x.maxC); return lo <= hi ? [lo, hi] : null; };\n      info.forEach(x => { x.minC = c100(round(conv(x.pl, 0.2) + conv(x.ql, 0.4) + x.o.dmTotal, 2)); x.maxC = c100(round(conv(x.ph, 0.2) + conv(x.qh, 0.4) + x.o.dmTotal, 2)); });\n      let rest = info.slice(); const groups = [];\n      for (const [gname, cnt] of slots) {\n        const cand = rest.filter(x => feas(x, gname) && !(gname !== '미' && x.o.person.discipline === '징계') && !(gname === '수' && x.o.person.discipline === '불문경고'));\n        // 아래 등급에 들어갈 수 없는 교사(최저점이 이 등급 하한 이상)를 먼저 배정\n        cand.sort((a, b) => (b.minC >= c100(BAND[gname][0]) ? 1 : 0) - (a.minC >= c100(BAND[gname][0]) ? 1 : 0) || b.cur - a.cur);\n        const pick = cand.slice(0, cnt);\n        if (pick.length < cnt) { res.fail.push(`'${gname}' 등급 자리 ${cnt}명을 채울 수 있는 교사가 부족합니다. 교감·교장 순위를 조정하세요.`); return res; }\n        groups.push(pick.map(x => { const [lo, hi] = feas(x, gname); return Object.assign({}, x, { lo, hi, tg: gname }); }).sort((a, b) => b.cur - a.cur));\n        rest = rest.filter(x => !pick.includes(x));\n      }\n      targets = []; order = [];\n      for (const gr of groups) {\n        let t = solve(gr); let arr = gr;\n        if (!t) { arr = gr.slice().sort((a, b) => b.hi - a.hi || b.cur - a.cur); t = solve(arr); }\n        if (!t) { res.fail.push(`'${arr[0].tg}' 등급 안에서 동점 없이 점수를 정할 수 없습니다. 교감·교장 순위를 조정하세요.`); return res; }\n        order = order.concat(arr); targets = targets.concat(t);\n      }\n      res.reordered = true;\n    }\n    if (order !== info) { const tmp = order.slice(); info.length = 0; tmp.forEach(x => info.push(x)); }\n    info.forEach((x, i) => {\n      const T = targets[i];\n      const o = x.o;\n      if (T === x.cur) return;\n      // T = conv(P,0.2)+conv(Q,0.4)+dm 를 만족하는 P,Q 중 현재와 가장 가까운 값\n      const need = T - c100(o.dmTotal);\n      const P0 = c100(o.gpP.score), Q0 = c100(o.gpQ.score);\n      let best = null;\n      for (let P = c100(x.pl); P <= c100(x.ph); P++) {\n        const qc = need - c100(conv(P / 100, 0.2));               // 필요한 확인자 환산점(0.01 단위)\n        const qBase = Math.round(qc / 0.4);\n        for (let Q = qBase - 2; Q <= qBase + 2; Q++) {\n          if (Q < c100(x.ql) || Q > c100(x.qh)) continue;\n          if (c100(conv(Q / 100, 0.4)) !== qc) continue;\n          const cost = Math.abs(P - P0) * 2 + Math.abs(Q - Q0) * 4 + (P !== P0 && Q !== Q0 ? 1 : 0);   // 총점 영향이 작고, 한 사람(평정자 또는 확인자)만 바꾸는 쪽 우선\n          if (!best || cost < best.cost) best = { P, Q, cost };\n        }\n      }\n      if (!best) { res.fail.push(`${o.name}: 목표 총점 ${T / 100}점을 만드는 평정자·확인자 점수를 찾지 못했습니다.`); return; }\n      const spread = (el, auto, target) => {\n        const out = el.slice(); let diff = round(target - out.reduce((s, v) => s + v, 0), 2);\n        for (const k of [1, 2, 4, 0, 3]) { if (!diff) break; const max = GP_F[k] * 100; const nv = Math.min(max, Math.max(0, round(out[k] + diff, 2))); diff = round(diff - (nv - out[k]), 2); out[k] = nv; }\n        return out.map((v, k) => v === auto[k] ? null : v);\n      };\n      res.ov[o.id] = { p: spread(o.gpP.el, o.gpP.auto, best.P / 100), q: spread(o.gpQ.el, o.gpQ.auto, best.Q / 100) };\n      res.changes.push({ id: o.id, name: o.name, rank: i + 1, oldRank: o.totalRank, grade: x.tg, p: [o.gpP.score, best.P / 100], q: [o.gpQ.score, best.Q / 100], total: [o.total, T / 100] });\n    });\n    // 순위대로 정리되지 않았던(이미 맞는) 교사 중 평정자·확인자 점수가 순위 등급 범위를 벗어난 경우도 바로잡기\n    info.forEach(x => {\n      const o = x.o; if (res.ov[o.id]) return;\n      const okP = o.gpP.score >= x.pl && o.gpP.score <= x.ph, okQ = o.gpQ.score >= x.ql && o.gpQ.score <= x.qh;\n      if (!okP || !okQ) res.fail.push(`${o.name}: 평정자·확인자 평정점이 순위에 따른 등급 범위를 벗어나 있습니다(수동조정 값 확인).`);\n    });\n    res.ok = !res.fail.length;\n    return res;\n  }\n\n  const API = { JG, BJ, table, baejeong, grade, minEvaluators, round, rounddown, add, QUAL, QUANT, GP_F,\n    qualFromScore, qualSheet, evalScope, aggregate, compute, countGrades, distOK, adjustHint, autoAdjust, targets, evaluators };\n  if (typeof module !== 'undefined') module.exports = API; else root.DM = API;\n})(this);\n\n<\/script>\n<script>\n(function(){\n  const D = __PAYLOAD__;\n  const esc = s => String(s ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));\n  const f2 = v => v == null || isNaN(v) ? '' : Number(v).toFixed(2);\n  const st = { people: D.roster.map(p => ({ id: p.id, name: p.name, target: true, evaluator: p.id === D.evaluator.id })), qual: {} };\n  if (!st.people.some(p => p.id === D.evaluator.id)) st.people.push({ id: D.evaluator.id, name: D.evaluator.name, target: false, evaluator: true });\n  const q = st.qual[D.evaluator.id] = { mode: 'rank', ranks: {}, scores: {} };\n  let saved = true, dirty = false;\n  function render(){\n    const sh = DM.qualSheet(st, D.evaluator.id);\n    const direct = q.mode === 'score';\n    document.getElementById('ui').innerHTML = `\n    <div class=\"card\"><h1>정성(定性)평가 방법에 따른 다면평가자별 교사 다면평가표<\/h1>\n      <p class=\"sub\">${esc(D.school)} · ${esc(D.year)}학년도 (평가기간 ${esc(D.from)}~${esc(D.to)}) · 다면평가자 <b>${esc(D.evaluator.name)}<\/b> · 실평가대상자 ${sh.N}명<\/p><\/div>\n    <div class=\"card\"><b>평가 방법<\/b><ol>\n      <li>평가대상자가 제출한 교사 자기실적평가서를 참작하여, 근무수행태도·근무실적 및 근무수행능력을 종합해 <b>1위부터 ${sh.N}위까지 겹치지 않게 순위<\/b>를 입력합니다. 본인은 평가하지 않습니다.<\/li>\n      <li>순위에 따라 수(95점 이상) 30%·우(90~95점 미만) 40%·미(85~90점 미만) 20%·양(85점 미만) 10% 분포(양은 미에 가산)의 점수와 요소별 점수가 자동으로 들어갑니다.<\/li>\n      <li>입력을 마치면 <b>[결과 파일 저장]<\/b>을 눌러 만들어진 파일(정성평가결과_${esc(D.evaluator.name)}.json)을 평정자(교감)에게만 보냅니다. 출력해 서명하라는 안내가 있으면 [인쇄]를 누르세요.<\/li>\n      <li>평가 내용은 외부로 유출되지 않도록 하고, 다른 평가자와 협의하지 마세요. 이 파일은 인터넷에 연결하지 않으며 입력 내용은 저장 전까지 이 창에만 있습니다.<\/li><\/ol>\n      ${sh.N <= 3 ? `<label class=\"row\" style=\"margin-top:8px\"><input type=\"checkbox\" id=\"mode\" ${direct ? 'checked' : ''}> 평가대상자가 1~3명이므로 85~100점 범위에서 점수를 직접 입력<\/label>` : ''}<\/div>\n    <div class=\"card\">\n      ${sh.issues.length ? `<div class=\"msg err\">${sh.issues.map(esc).join('<br>')}<\/div>` : sh.complete ? '<div class=\"msg ok\">모든 대상자의 평가가 끝났습니다. [결과 파일 저장]을 누르세요.<\/div>' : ''}\n      <table><thead><tr><th>연번<\/th><th>성명<\/th><th>${direct ? '총점' : '순위'}<\/th><th>교육공무원으로서의<br>태도(10)<\/th><th>학습지도<br>(40)<\/th><th>생활지도<br>(30)<\/th><th>전문성개발<br>(5)<\/th><th>담당업무<br>(15)<\/th><th>평가점(총점)<br>(100)<\/th><\/tr><\/thead><tbody>\n      ${D.roster.map((p,k) => { if (p.id === D.evaluator.id) return `<tr class=\"self\"><td>${k+1}<\/td><td>${esc(p.name)}<\/td><td colspan=\"7\">본인 — 평가하지 않음<\/td><\/tr>`;\n        const r = sh.rows.find(x => x.id === p.id);\n        const v = direct ? (q.scores[p.id] ?? '') : (q.ranks[p.id] ?? '');\n        return `<tr><td>${k+1}<\/td><td>${esc(p.name)}<\/td><td><input class=\"rk ${(r.dup||r.bad)?'bad':''}\" data-id=\"${p.id}\" value=\"${esc(v)}\"><\/td>${(r.el||[null,null,null,null,null]).map(x=>`<td class=\"r\">${f2(x)}<\/td>`).join('')}<td class=\"r\"><b>${f2(r.total)}<\/b><\/td><\/tr>`; }).join('')}\n      <\/tbody><\/table>\n      <div class=\"row\" style=\"margin-top:12px\"><span class=\"sp\"><\/span><button class=\"btn\" id=\"print\">인쇄<\/button><button class=\"btn pri\" id=\"save\" ${sh.complete ? '' : 'disabled'}>결과 파일 저장<\/button><\/div><\/div>`;\n    document.getElementById('paper').innerHTML = `<p style=\"font-size:8.5pt;margin:0\">[서식 1] 학교보관<\/p><h2>정성(定性)평가 방법에 따른 다면평가자별 교사 다면평가표<\/h2>\n      <p style=\"text-align:right\">∘ 다면평가자 성명: ${esc(D.evaluator.name)} (인)<\/p>\n      <table><thead><tr><th colspan=\"2\">평가대상자<\/th><th colspan=\"5\">평가사항: 근무수행태도, 근무실적 및 근무수행능력<\/th><th rowspan=\"2\">평가점<br>(총점)(100)<\/th><\/tr>\n      <tr><th>연번<\/th><th>성명<\/th><th>교육공무원으로<br>서의 태도(10)<\/th><th>학습지도<br>(40)<\/th><th>생활지도<br>(30)<\/th><th>전문성개발<br>(5)<\/th><th>담당업무<br>(15)<\/th><\/tr><\/thead><tbody>\n      ${D.roster.map((p,k)=>{ const r = sh.rows.find(x=>x.id===p.id); return `<tr><td>${k+1}<\/td><td>${esc(p.name)}<\/td>${(r&&r.el?r.el:[null,null,null,null,null]).map(x=>`<td>${f2(x)}<\/td>`).join('')}<td>${r?f2(r.total):''}<\/td><\/tr>`; }).join('')}<\/tbody><\/table>\n      <div class=\"remark\">○ 다면평가자는 본인 평가를 실시하지 않음\n○ 다면평가점(총점)은 등급별 분포비율에 맞춰 상대평가 실시(강제배분): 수(95점 이상) 30퍼센트, 우(90점 이상 95점 미만) 40퍼센트, 미(85점 이상 90점 미만) 20퍼센트, 양(85점 미만) 10퍼센트\n   ※ 평가점 ‘양’에 해당하는 자가 없거나, 그 비율 이하일 때에는 ‘양’의 비율을 ‘미’에 가산\n○ 평가점은 특별한 사정이 없으면 동점을 주지 않도록 해야 함<\/div>`;\n  }\n  document.addEventListener('input', e => {\n    const t = e.target; if (!t.dataset.id) return;\n    const v = t.value.trim(); const box = q.mode === 'score' ? q.scores : q.ranks;\n    if (v === '') delete box[t.dataset.id]; else box[t.dataset.id] = Number(v);\n    saved = false; dirty = true;\n  });\n  document.addEventListener('focusout', e => { if (e.target.dataset && e.target.dataset.id && dirty) setTimeout(() => { if (!dirty) return; dirty = false; const a = document.activeElement; const id = a && a.dataset ? a.dataset.id : null; render(); if (id) { const n = document.querySelector(`[data-id=\"${id}\"]`); n && (n.focus(), n.select()); } }, 0); });\n  document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.dataset.id) { e.preventDefault(); const ins = [...document.querySelectorAll('input.rk')]; const n = ins[ins.indexOf(e.target) + 1]; n ? n.focus() : e.target.blur(); } });\n  document.addEventListener('change', e => { if (e.target.id === 'mode') { q.mode = e.target.checked ? 'score' : 'rank'; render(); } });\n  document.addEventListener('click', e => {\n    if (e.target.id === 'print') { render(); window.print(); }\n    if (e.target.id === 'save') {\n      const out = { kind: 'dm-eval-result', ver: 1, school: D.school, year: D.year, evaluator: D.evaluator, key: D.key, mode: q.mode, ranks: q.ranks, scores: q.scores, savedAt: new Date().toISOString() };\n      const b = new Blob([JSON.stringify(out)], { type: 'application/json' });\n      const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `정성평가결과_${D.evaluator.name}.json`; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);\n      saved = true;\n    }\n  });\n  window.addEventListener('beforeunload', e => { if (!saved) { e.preventDefault(); e.returnValue = ''; } });\n  render();\n})();\n<\/script><\/body><\/html>\n";
+/* =====================================================================
+ * 교사 다면평가·근무성적평정 프로그램 (PC 웹 버전) — 화면/입출력
+ * 자료는 이 PC의 브라우저 저장소와 사용자가 저장한 파일에만 보관됩니다(외부 전송 없음).
+ * ===================================================================== */
+(function () {
+  'use strict';
+  const KEY = 'dm2025-main-v1';
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const f2 = v => v == null || v === '' || isNaN(v) ? '' : Number(v).toFixed(2);
+  const fnum = v => v == null || v === '' || isNaN(v) ? '' : String(+Number(v).toFixed(3));
+  const uid = () => 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  const gcls = g => g ? `g-${g}` : '';
+
+  // ── 기본 정량평가 세부기준(엑셀 프로그램 '정량_세부평가' 시트 예시와 동일) ────────
+  const DEFAULT_CRITERIA = () => ({
+    sections: [
+      { name: '학습지도', max: 30, items: [
+        { title: '1) 주당수업시간', levels: [{ d: '20시간 이상', s: 5 }, { d: '15~19시간', s: 4 }, { d: '10~14시간', s: 3 }] },
+        { title: '2) 연구수업', levels: [{ d: '4회 이상', s: 10 }, { d: '4회 미만', s: 8 }] },
+        { title: '3) 수업컨설팅', levels: [{ d: '3회 이상', s: 5 }, { d: '3회 미만', s: 4 }] },
+        { title: '4) 학습지도 곤란도', levels: [{ d: '통합수업, 다교과', s: 10 }, { d: '그 외', s: 8 }] }] },
+      { name: '생활지도', max: 30, items: [
+        { title: '1) 학생상담 실적', levels: [{ d: '학생상담', s: 5 }] },
+        { title: '2) 학부모 상담', levels: [{ d: '학부모상담', s: 5 }] },
+        { title: '3) 생활지도 곤란도(담임, 비담임)', levels: [{ d: '생활지도', s: 10 }] },
+        { title: '4) 학년 곤란도', levels: [{ d: '학년곤란도', s: 10 }] }] },
+      { name: '전문성개발', max: 10, items: [
+        { title: '1) 연수이수', levels: [{ d: '연수이수', s: 5 }] },
+        { title: '2) 교과연구회', levels: [{ d: '교과연구회 참여', s: 3 }] },
+        { title: '3) 연구대회', levels: [{ d: '연구대회', s: 2 }] }] },
+      { name: '담당업무', max: 30, items: [
+        { title: '1) 업무곤란도', levels: [{ d: '업무곤란도', s: 10 }] },
+        { title: '2) 업무추진실적', levels: [{ d: '업무추진실적', s: 10 }] },
+        { title: '3) 업무분장', levels: [{ d: '업무분장', s: 10 }] }] }
+    ]
+  });
+
+  const blankState = () => ({
+    v: 1,
+    info: { school: '', level: '초등학교', type: 'regular', year: 2025, from: '2025. 3. 1.', to: '2026. 2. 28.',
+      vpTitle: '교감', vpName: '', prTitle: '교장', prName: '', dirTitle: '교육과장', dirName: '' },
+    people: [], criteria: DEFAULT_CRITERIA(), qual: {}, quant: {}, gp: {}, perfRate: { qual: 20, quant: 80 },
+    evalKeys: {}, updated: null
+  });
+
+  let S = load();
+  let step = sessionStorage.getItem('dm-step') || 'home';
+  let ui = { qualOpen: null, printSel: null, printMode: null, gpOpen: {}, gpSort: sessionStorage.getItem('dm-gpsort') || 'input' };
+
+  function load() {
+    try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.v === 1) return Object.assign(blankState(), s); } catch (e) { }
+    return blankState();
+  }
+  let saveTimer = null;
+  function save() {
+    S.updated = new Date().toISOString();
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('브라우저 저장소에 저장하지 못했습니다. [작업 파일 저장]으로 백업하세요.'); } }, 150);
+  }
+  function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2600); }
+  function download(name, text, type = 'application/json') {
+    const b = new Blob([text], { type: type + ';charset=utf-8' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  function pickFiles(accept, multiple, cb) {
+    const fp = $('#filePick'); fp.value = ''; fp.accept = accept; fp.multiple = !!multiple;
+    fp.onchange = () => { const files = [...fp.files]; Promise.all(files.map(f => f.text().then(t => ({ name: f.name, text: t })))).then(cb); };
+    fp.click();
+  }
+  const isRegular = () => S.info.type !== 'contract';
+  const T = () => DM.targets(S), E = () => DM.evaluators(S);
+  const rosterKey = () => T().map(p => p.id + ':' + p.name).join('|');
+  const vp = () => `${S.info.vpTitle} ${S.info.vpName}`.trim();
+  const pr = () => `${S.info.prTitle} ${S.info.prName}`.trim();
+
+  // ── 단계 정의 ───────────────────────────────────────
+  const STEPS = [
+    { id: 'home', t: '시작하기', d: '작업 순서와 자료 관리' },
+    { id: 'info', t: '기본 정보', d: '학교·평정자·확인자' },
+    { id: 'roster', t: '평가대상자·다면평가자', d: '명단 입력과 선정 점검' },
+    { id: 'criteria', t: '정량평가 세부기준', d: '[서식2] 기준표 작성·배부' },
+    { id: 'qual', t: '정성평가(다면평가자)', d: '평가자 파일 배부·회수' },
+    { id: 'quant', t: '정량평가 점수', d: '[서식2-1] 요소별 소계 입력' },
+    { id: 'result', t: '다면평가 결과', d: '[서식1-1]·[서식5] 확인' },
+    { id: 'gp', t: '근무성적평정·합산', d: '교감·교장 순위, 분포 맞추기', reg: true },
+    { id: 'print', t: '출력', d: '내부결재·교육청 제출·성과급' }
+  ];
+
+  function status() {
+    const C = DM.compute(S);
+    const st = {};
+    st.info = S.info.school && S.info.vpName && S.info.prName ? 'done' : '';
+    const nT = C.N, nE = C.E.length;
+    st.roster = nT && nE >= DM.minEvaluators(nT) && !rosterProblems().errors.length ? 'done' : (nT ? 'bad' : '');
+    st.criteria = 'done';
+    const qs = C.E.map(e => C.sheets[e.id]);
+    st.qual = nE && qs.every(s => s.complete) ? 'done' : '';
+    st.quant = nT && C.list.every(o => o.quantTotal != null) ? 'done' : '';
+    st.result = nT && C.list.every(o => o.dmTotal != null) ? 'done' : '';
+    st.gp = C.checks.done ? (C.checks.errors.length ? 'bad' : 'done') : '';
+    return { st, C };
+  }
+
+  function renderSide() {
+    const { st, C } = status();
+    const stat = {
+      roster: `대상 ${C.N}명 · 다면평가자 ${C.E.length}명`,
+      qual: `${C.E.filter(e => C.sheets[e.id].complete).length}/${C.E.length}명 완료`,
+      quant: `${C.list.filter(o => o.quantTotal != null).length}/${C.N}명 입력`,
+      gp: C.checks.done ? (C.checks.errors.length ? '점검 필요' : '분포 일치') : ''
+    };
+    $('#side').innerHTML = `
+      <h1>교사 다면평가·<br>근무성적평정 프로그램</h1>
+      <p class="sub">${esc(S.info.year)}학년도 · ${isRegular() ? '정규교사(근평+다면)' : '계약제 교원(성과급용 다면평가)'}</p>
+      <ol>${STEPS.filter(s => !s.reg || isRegular()).map((s, i) => `
+        <li><button data-go="${s.id}" class="${step === s.id ? 'on' : ''}">
+          <span class="num ${st[s.id] || ''}">${st[s.id] === 'done' ? '✓' : st[s.id] === 'bad' ? '!' : i + 1}</span>
+          <span>${s.t}<span class="stat">${esc(stat[s.id] || s.d)}</span></span></button></li>`).join('')}
+      </ol>
+      <div class="foot">
+        <button data-act="backup">⬇ 작업 파일 저장(백업)</button>
+        <button data-act="restore">⬆ 작업 파일 불러오기</button>
+        <div style="margin-top:8px">자료는 이 PC의 브라우저에만 저장되며 외부로 전송되지 않습니다.${S.updated ? `<br>마지막 저장: ${new Date(S.updated).toLocaleString('ko-KR')}` : ''}</div>
+      </div>`;
+  }
+
+  function go(id) { step = id; sessionStorage.setItem('dm-step', id); render(); window.scrollTo(0, 0); }
+  function render() {
+    if (!isRegular() && step === 'gp') step = 'result';
+    renderSide();
+    const fn = { home: vHome, info: vInfo, roster: vRoster, criteria: vCriteria, qual: vQual, quant: vQuant, result: vResult, gp: vGp, print: vPrint }[step] || vHome;
+    $('#main').innerHTML = fn();
+    after[step] && after[step]();
+  }
+  const after = {};
+  function nav(prev, next) {
+    return `<div class="row" style="margin-top:18px">${prev ? `<button class="btn" data-go="${prev}">← 이전 단계</button>` : ''}<span class="spacer"></span>${next ? `<button class="btn pri" data-go="${next}">다음 단계 →</button>` : ''}</div>`;
+  }
+
+  // ════════════════════════════ 1. 시작하기 ════════════════════════════
+  function vHome() {
+    return `<h2>시작하기</h2>
+    <p class="lead">「2025학년도 교사 다면평가 계획(시행)」과 교육지원청 제공 엑셀 프로그램(2025학년도 초등학교 다면평가프로그램(최종))의 절차·계산 방식을 그대로 따릅니다.</p>
+    ${S.people.some(p => /^sx\d$/.test(p.id)) ? `<div class="msg warn">이전 버전의 ‘교사 10명 연습 자료’가 이 브라우저에 저장되어 있습니다. 아래 <b>[연습 자료 불러오기(교원 35명)]</b>를 누르면 35명 자료로 바뀝니다.</div>` : ''}
+    <div class="card"><h3>작업 순서 <small>왼쪽 메뉴를 위에서부터 차례로 진행합니다</small></h3>
+      <ol class="steps">
+        <li><b>기본 정보</b> — 학교명, 평가기간, 평정자(교감)·확인자(교장)·조정자 직위와 성명</li>
+        <li><b>평가대상자·다면평가자</b> — 교사 명단 입력, 다면평가자 지정(대상자 수별 최소 인원 자동 점검: 15명 이하 3명, 16~20명 4명 … 36명 이상 8명)</li>
+        <li><b>정량평가 세부기준</b> — 다면평가관리위원회 심의 후 확정된 [서식2] 기준 입력(요소·배점 30·30·10·30 고정), 기준 공지·확인 서명부와 개인별 세부평가표 출력</li>
+        <li><b>정성평가</b> — 다면평가자별 ‘평가자용 파일(HTML)’을 만들어 배부 → 평가자는 본인을 제외한 대상자의 <b>순위만</b> 입력해 결과 파일을 돌려줌 → 결과 파일 불러오기(서면평가는 직접 입력)</li>
+        <li><b>정량평가 점수</b> — 다면평가자가 평정한 [서식2]의 요소별 소계를 입력</li>
+        <li><b>다면평가 결과</b> — 요소별 집계(평가자 4인 이상이면 최고·최저 1개씩 제외), 정성×32% + 정량×8% = 40점 만점</li>
+        <li><b>근무성적평정·합산</b> — 교감·교장 순위 입력, ⑦총점 기준과 ⑧조정점 기준 등급 분포 일치 확인, 필요 시 수동조정</li>
+        <li><b>출력</b> — 내부결재용(입력순), 교육청 제출용(순위 정렬·직위/성명 수기), 성과급용(정성 20%·정량 80%)</li>
+      </ol></div>
+    <div class="grid2">
+      <div class="card"><h3>자료 보관</h3>
+        <p class="note" style="margin-top:0">입력 내용은 이 PC 브라우저에 자동 저장됩니다. 다른 PC로 옮기거나 단계별로 보관하려면 <b>작업 파일 저장</b>으로 백업 파일(.json)을 만드세요. 인사 자료이므로 공용 PC에서는 작업 후 <b>모든 자료 지우기</b>를 하세요.</p>
+        <div class="row"><button class="btn pri" data-act="backup">⬇ 작업 파일 저장</button><button class="btn" data-act="restore">⬆ 작업 파일 불러오기</button><span class="spacer"></span><button class="btn danger" data-act="wipe">모든 자료 지우기</button></div>
+      </div>
+      <div class="card"><h3>연습해 보기</h3>
+        <p class="note" style="margin-top:0">가상의 연습 자료를 불러옵니다. 현재 입력된 자료는 바뀌므로 먼저 백업하세요.</p>
+        <div class="row" style="align-items:flex-start;margin-bottom:8px"><button class="btn pri" data-act="sample35">연습 자료 불러오기(교원 35명)</button><span class="note" style="flex:1">한빛초(가상) 교원 35명(보건·영양·특수·전문상담교사 포함), 다면평가자 7명(31~35명 기준 최소 인원). 정성·정량·교감·교장 순위까지 모두 입력되어 있고, ⑦총점과 ⑧조정점 등급이 <b>1명(황준서)</b> 어긋나 있어 수동조정을 연습할 수 있습니다.</span></div>
+      </div>
+    </div>
+    <div class="card"><h3>엑셀 프로그램과 달라진 점</h3>
+      <ul class="note" style="margin:0;padding-left:18px;line-height:1.7">
+        <li>파일을 한 폴더에 모아 매크로로 불러오던 과정을 ‘결과 파일 불러오기’로 바꾸었습니다(파일명 변경·연결 오류 걱정 없음).</li>
+        <li>실평가대상자 수는 ‘평가자 본인이 평가대상자에 포함되는지’를 직접 따져 계산합니다(수석교사 등 대상자가 아닌 평가자도 정확히 처리).</li>
+        <li>개인별 정량 세부평가표 배부용에는 다면평가자 이름이 나오지 않도록 했습니다(익명성 보장).</li>
+        <li>성과급용 출력은 백분율을 바꿨다가 되돌릴 필요 없이 ‘성과급용’ 묶음으로 따로 출력합니다.</li>
+        <li>⑦·⑧ 분포 비교, 평정자·확인자별 분포, 동점, 징계·불문경고 평정 제한을 자동 점검합니다.</li>
+      </ul></div>
+    ${nav(null, 'info')}`;
+  }
+
+  // ════════════════════════════ 2. 기본 정보 ════════════════════════════
+  function vInfo() {
+    const i = S.info;
+    const inp = (k, label, ph = '') => `<label class="f"><span>${label}</span><input data-info="${k}" value="${esc(i[k])}" placeholder="${esc(ph)}"></label>`;
+    return `<h2>기본 정보</h2><p class="lead">출력 서식의 머리말(평가기간, 확인자·평정자 직위와 성명)에 쓰입니다. 교육청 제출용 서식은 직위·성명을 비워 두고 수기로 기재합니다.</p>
+    <div class="card"><h3>학교</h3><div class="grid3">
+      ${inp('school', '학교(기관)명', '예: 모산초등학교')}
+      <label class="f"><span>학교급</span><select data-info="level">${['초등학교', '유치원'].map(v => `<option ${i.level === v ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
+      <label class="f"><span>평가 구분</span><select data-info="type">
+        <option value="regular" ${i.type === 'regular' ? 'selected' : ''}>정규교사 — 근무성적평정 + 다면평가</option>
+        <option value="contract" ${i.type === 'contract' ? 'selected' : ''}>계약제(기간제) 교원 — 성과급용 다면평가만</option></select></label>
+      ${inp('year', '평정 학년도')}${inp('from', '평가기간 시작', '2025. 3. 1.')}${inp('to', '평가기간 끝', '2026. 2. 28.')}
+    </div>
+    <p class="note">평가기간: 2025. 3. 1.~2026. 2. 28.(12개월). 승진 활용과 개인성과급 활용 평가기간이 같으며 다면평가는 1회만 실시합니다. 8월 퇴임자·기간제 교원이 있으면 엑셀 때처럼 별도 작업 파일로 따로 운영하세요.</p></div>
+    <div class="card"><h3>평정자·확인자·조정자</h3><div class="grid3">
+      ${inp('vpTitle', '평정자 직위', '교감')}${inp('vpName', '평정자 성명 (다면평가관리위원회 위원장)')}<div></div>
+      ${inp('prTitle', '확인자 직위', '교장')}${inp('prName', '확인자 성명')}<div></div>
+      ${inp('dirTitle', '조정자 직위', '교육과장')}${inp('dirName', '조정자 성명')}<div></div>
+    </div><p class="note">교(원)감 미배치교: 평정자 교(원)장, 확인자 교육과장, 조정자 교육장(근무성적평정 계획 4-나).</p></div>
+    ${isRegular() ? '' : `<div class="card"><h3>성과급 반영 비율</h3><div class="row">정성 <input class="num" data-rate="qual" value="${esc(S.perfRate.qual)}">% · 정량 <input class="num" data-rate="quant" value="${esc(S.perfRate.quant)}">% <span class="note">교육공무원 성과상여금 지급지침(통상 정성 20%, 정량 80%)</span></div></div>`}
+    ${nav('home', 'roster')}`;
+  }
+
+  // ════════════════════════════ 3. 명단 ════════════════════════════
+  const KINDS = ['교사', '수석교사', '보건교사', '영양교사', '사서교사', '전문상담교사', '특수교사', '기간제교사'];
+  function rosterProblems() {
+    const errors = [], warns = [];
+    const names = S.people.filter(p => p.name).map(p => p.name.trim());
+    const dup = names.filter((n, k) => names.indexOf(n) !== k);
+    if (dup.length) errors.push(`동명이인(또는 중복 입력): ${[...new Set(dup)].join(', ')} — 이름 뒤에 구분 표시를 붙이세요. 예: 홍길동(1담임)`);
+    S.people.forEach(p => {
+      if (!p.name) return;
+      if (p.kind === '수석교사' && p.target) errors.push(`${p.name}: 수석교사는 다면평가 대상자가 아닙니다(다면평가자는 가능).`);
+      if (p.kind === '기간제교사' && p.evaluator) errors.push(`${p.name}: 계약제 교원(기간제교사 등)은 다면평가자에서 제외됩니다.`);
+      if (isRegular() && p.kind === '기간제교사' && p.target) warns.push(`${p.name}: 기간제교사는 근무성적평정 대상이 아닙니다. 평가 구분을 ‘계약제 교원’으로 한 별도 작업 파일에서 평가하세요.`);
+      if (!isRegular() && p.discipline) warns.push(`${p.name}: 징계 표시는 근무성적평정에서만 점검됩니다.`);
+    });
+    const nT = T().length, nE = E().length;
+    if (nT && nE < DM.minEvaluators(nT)) errors.push(`평가대상자 ${nT}명 → 다면평가자 ${DM.minEvaluators(nT)}명 이상 필요(현재 ${nE}명)`);
+    if (nT > 100) errors.push('평가대상자는 100명까지 처리할 수 있습니다.');
+    if (nE && E().every(e => e.target) && nT - 1 < 1) errors.push('다면평가자가 평가할 대상자가 없습니다.');
+    return { errors, warns };
+  }
+  function vRoster() {
+    const P = S.people;
+    const { errors, warns } = rosterProblems();
+    const nT = T().length, nE = E().length;
+    const hasQual = Object.keys(S.qual).some(k => S.qual[k] && (Object.keys(S.qual[k].ranks || {}).length || Object.keys(S.qual[k].scores || {}).length));
+    return `<h2>평가대상자·다면평가자</h2>
+    <p class="lead">교사 명단을 입력하고 다면평가자를 지정합니다. 순서는 내부결재용 출력물의 순서가 됩니다.</p>
+    ${hasQual ? `<div class="msg warn">이미 정성평가 자료가 있습니다. 대상자를 추가·삭제하거나 이름을 바꾸면 평가자별 실평가대상자 수가 달라지므로 평가자용 파일을 다시 만들어 평가를 다시 받아야 합니다.</div>` : ''}
+    <div class="card">
+      <div class="row" style="margin-bottom:10px">
+        <span class="pill ${nT ? 'ok' : 'mute'}">평가대상자 ${nT}명</span>
+        <span class="pill ${nT && nE >= DM.minEvaluators(nT) ? 'ok' : 'err'}">다면평가자 ${nE}명 / 최소 ${nT ? DM.minEvaluators(nT) : '-'}명</span>
+        <span class="spacer"></span>
+        <button class="btn" data-act="pasteRoster">엑셀에서 붙여넣기</button>
+        <button class="btn" data-act="addRow">＋ 행 추가</button>
+      </div>
+      <div class="tbl-wrap"><table class="t"><thead><tr><th style="width:44px">연번</th><th>성명</th><th style="width:110px">생년월일</th><th style="width:130px">구분</th><th style="width:80px">평가대상</th><th style="width:90px">다면평가자</th><th style="width:150px">징계 등<br><span class="mini">(근평 제한 점검)</span></th><th>비고</th><th style="width:96px"></th></tr></thead>
+      <tbody>${P.map((p, k) => `<tr>
+        <td>${k + 1}</td>
+        <td><input data-p="${p.id}" data-k="name" value="${esc(p.name)}" style="width:100%"></td>
+        <td><input data-p="${p.id}" data-k="birth" value="${esc(p.birth)}" style="width:100%" placeholder="예: 791111"></td>
+        <td><select data-p="${p.id}" data-k="kind">${KINDS.map(v => `<option ${p.kind === v ? 'selected' : ''}>${v}</option>`).join('')}</select></td>
+        <td><input type="checkbox" data-p="${p.id}" data-k="target" ${p.target ? 'checked' : ''}></td>
+        <td><input type="checkbox" data-p="${p.id}" data-k="evaluator" ${p.evaluator ? 'checked' : ''}></td>
+        <td><select data-p="${p.id}" data-k="discipline"><option value="">없음</option><option value="불문경고" ${p.discipline === '불문경고' ? 'selected' : ''}>불문경고(‘수’ 불가)</option><option value="징계" ${p.discipline === '징계' ? 'selected' : ''}>징계 견책 이상(‘우’ 이상 불가)</option></select></td>
+        <td><input data-p="${p.id}" data-k="note" value="${esc(p.note)}" style="width:100%"></td>
+        <td><button class="btn sm" data-mv="${p.id}" data-d="-1" title="위로">▲</button><button class="btn sm" data-mv="${p.id}" data-d="1" title="아래로">▼</button><button class="btn sm danger" data-del="${p.id}" title="삭제">✕</button></td>
+      </tr>`).join('') || `<tr><td colspan="9" class="note" style="padding:20px">‘＋ 행 추가’ 또는 ‘엑셀에서 붙여넣기’로 명단을 입력하세요.</td></tr>`}</tbody></table></div>
+      ${errors.length ? `<div class="msg err"><b>확인 필요</b><ul>${errors.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div>` : ''}
+      ${warns.length ? `<div class="msg warn"><ul style="margin:0 0 0 18px">${warns.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div>` : ''}
+    </div>
+    <div class="grid2">
+      <div class="card"><h3>평가대상자 <small>교육공무원 승진규정 제2조</small></h3><ul class="note" style="margin:0;padding-left:18px;line-height:1.7">
+        <li>학교에 근무하는 교사(수석교사 제외)</li><li>평정단위 학년도에 실제 근무한 기간이 2개월 미만인 사람은 제외(휴가·휴직·직위해제·정직·교육훈련파견 등 미종사 기간 제외, 기간 분리 시 60일=2개월)</li>
+        <li>기간제교사·2025년 8월 말 퇴직자·2026. 2. 28. 이전 의원면직자는 근무성적평정 대상 아님</li></ul></div>
+      <div class="card"><h3>다면평가자 선정기준 <small>제28조의4</small></h3><ul class="note" style="margin:0;padding-left:18px;line-height:1.7">
+        <li>평가일 현재 당해 학교 실근무 10개월 이상인 정규교사, 업무 실적을 종합적으로 파악할 수 있는 교사(수석교사 가능)</li>
+        <li>제외: 휴직·파견·직위해제·정직 중인 교사, 계약제 교원</li>
+        <li>확인자(교장)가 선정·최종결재, 평가 직전에 선정해 익명성 보장. 다면평가자는 본인을 평가하지 않음</li></ul></div>
+    </div>
+    ${nav('info', 'criteria')}`;
+  }
+
+  // ════════════════════════════ 4. 정량평가 기준 ════════════════════════════
+  function vCriteria() {
+    const C = S.criteria;
+    return `<h2>정량평가 세부기준 <small class="note">[서식2] 정량평가 방법에 따른 교사 다면평가 평가대상자별 세부평가표</small></h2>
+    <p class="lead">평가 내용 및 세부 기준은 전체 교원 의견 수렴 → 다면평가관리위원회 심의 → 확인자(교장) 결정 후 전체 교원에게 공지(교사 확인 서명 자료 학교 보관)합니다. <b>평가요소와 배점(학습지도 30, 생활지도 30, 전문성개발 10, 담당업무 30)은 변경할 수 없습니다.</b></p>
+    ${C.sections.map((sec, si) => {
+      const maxSum = sec.items.reduce((s, it) => s + Math.max(0, ...it.levels.map(l => Number(l.s) || 0)), 0);
+      return `<div class="card"><h3>${'가나다라'[si]}. ${sec.name} (${sec.max}점) <small>항목별 최고점 합계 ${fnum(maxSum)}점 ${maxSum === sec.max ? '<span class="pill ok">배점과 일치</span>' : `<span class="pill warn">배점 ${sec.max}점과 다름</span>`}</small></h3>
+      ${sec.items.map((it, ii) => `<div style="border:1px solid var(--line2);border-radius:8px;padding:8px 10px;margin-bottom:8px">
+        <div class="row"><input data-cit="${si}.${ii}" value="${esc(it.title)}" style="flex:1;font-weight:600"><button class="btn sm" data-addlv="${si}.${ii}">＋ 세부기준</button><button class="btn sm danger" data-delit="${si}.${ii}">항목 삭제</button></div>
+        ${it.levels.map((lv, li) => `<div class="row" style="margin:6px 0 0 16px"><input data-clv="${si}.${ii}.${li}" data-f="d" value="${esc(lv.d)}" style="flex:1" placeholder="세부 기준"><input class="num" data-clv="${si}.${ii}.${li}" data-f="s" value="${esc(lv.s)}"> 점 <button class="btn sm danger" data-dellv="${si}.${ii}.${li}">✕</button></div>`).join('')}
+      </div>`).join('')}
+      <button class="btn sm" data-addit="${si}">＋ 평가 내용 추가</button></div>`;
+    }).join('')}
+    <div class="card"><h3>출력</h3><div class="row">
+      <button class="btn" data-print="criteriaNotice">기준 공지 및 확인 서명부</button>
+      <button class="btn" data-print="form2blank">[서식2] 개인별 세부평가표(배부용·평가자 이름 없음)</button>
+      <button class="btn" data-print="form2keep">[서식2] 개인별 세부평가표(보관용·다면평가자 확인란)</button>
+      <span class="spacer"></span><button class="btn danger" data-act="resetCriteria">예시 기준으로 되돌리기</button></div>
+      <p class="note">평가대상자는 실적내용을 본인이 기재해 제출하고, 다면평가자가 평정점을 부여해 공동 서명한 뒤 위원장에게 제출합니다.</p></div>
+    ${nav('roster', 'qual')}`;
+  }
+
+  // ════════════════════════════ 5. 정성평가 ════════════════════════════
+  function vQual() {
+    const C = DM.compute(S);
+    const Es = C.E;
+    if (!Es.length) return `<h2>정성평가(다면평가자)</h2><div class="msg warn">먼저 명단에서 다면평가자를 지정하세요.</div>${nav('criteria', 'quant')}`;
+    const open = ui.qualOpen && Es.find(e => e.id === ui.qualOpen) ? ui.qualOpen : null;
+    const rk = rosterKey();
+    return `<h2>정성평가 <small class="note">[서식1] 정성평가 방법에 따른 다면평가자별 교사 다면평가표</small></h2>
+    <p class="lead">다면평가자는 평가대상자가 제출한 교사 자기실적평가서를 참작해 <b>본인을 제외한 대상자에게 겹치지 않는 순위</b>만 매깁니다. 순위에 따라 수(95점 이상) 30%·우 40%·미 20%·양 10% 분포(양은 미에 가산)의 점수와 요소별 점수가 자동 부여됩니다.</p>
+    <div class="msg info"><b>배부·회수 방법</b> ① 아래 [평가자용 파일 만들기]로 받은 HTML 파일을 해당 평가자에게만 전달(보안 유지) → ② 평가자는 크롬·엣지로 열어 순위 입력 후 [결과 파일 저장] → ③ 받은 결과 파일(.json)을 [결과 파일 불러오기]로 읽음. 서면평가를 했다면 [직접 입력]을 쓰세요. 서식1은 평가자가 출력해 서명하거나 교감이 출력 후 서명을 받습니다.</div>
+    <div class="card"><div class="row" style="margin-bottom:8px"><h3 style="margin:0">다면평가자 ${Es.length}명</h3><span class="spacer"></span>
+      <button class="btn" data-act="makeAllEval">모든 평가자용 파일 만들기</button><button class="btn pri" data-act="importEval">결과 파일 불러오기(여러 개 가능)</button></div>
+      <table class="t"><thead><tr><th>다면평가자</th><th>실평가대상자 수</th><th>평가 방법</th><th>진행 상태</th><th></th></tr></thead><tbody>
+      ${Es.map(e => {
+        const sh = C.sheets[e.id]; const q = S.qual[e.id] || {};
+        const filled = sh.rows.filter(r => r.total != null).length;
+        const stale = S.evalKeys[e.id] && S.evalKeys[e.id] !== rk;
+        return `<tr class="${open === e.id ? 'hl' : ''}"><td class="l"><b>${esc(e.name)}</b>${e.target ? '' : ' <span class="pill mute">대상자 아님</span>'}</td><td>${sh.N}명</td>
+          <td>${q.mode === 'score' ? '점수 직접 입력' : '순위 입력'}${q.src ? `<div class="mini">${esc(q.src)}</div>` : ''}</td>
+          <td>${sh.complete ? '<span class="pill ok">완료</span>' : filled ? `<span class="pill warn">${filled}/${sh.N} 입력</span>` : '<span class="pill mute">미입력</span>'}${stale ? '<div class="mini" style="color:var(--err)">명단이 바뀜 — 파일 재배부 필요</div>' : ''}</td>
+          <td><button class="btn sm" data-mkeval="${e.id}">평가자용 파일 만들기</button> <button class="btn sm" data-openq="${e.id}">${open === e.id ? '닫기' : '직접 입력·확인'}</button> <button class="btn sm" data-print="form1:${e.id}">서식1 출력</button></td></tr>`;
+      }).join('')}</tbody></table></div>
+    ${open ? qualEditor(C, open) : ''}
+    ${nav('criteria', 'quant')}`;
+  }
+  function qualEditor(C, evId) {
+    const e = S.people.find(p => p.id === evId);
+    const sh = C.sheets[evId]; const q = S.qual[evId] || { mode: 'rank' };
+    return `<div class="card"><div class="row"><h3 style="margin:0">${esc(e.name)} 다면평가자의 평가표</h3><span class="spacer"></span>
+      ${sh.N <= 3 ? `<label class="row note"><input type="checkbox" data-qmode="${evId}" ${q.mode === 'score' ? 'checked' : ''}> 대상자 1~3명: 점수를 직접 입력(85~100점)</label>` : ''}
+      <button class="btn sm danger" data-qclear="${evId}">이 평가자 자료 지우기</button></div>
+      <p class="note">실평가대상자 ${sh.N}명 (${e.target ? '본인 제외' : '본인은 평가대상자가 아님'}) · 순위 입력 시 학습지도 점수는 ‘총점 − 다른 요소’로 자동 계산됩니다.</p>
+      ${sh.issues.length ? `<div class="msg err"><ul style="margin:0 0 0 18px">${sh.issues.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : sh.complete ? '<div class="msg ok">순위가 빠짐없이 중복 없이 입력되었습니다.</div>' : ''}
+      <div class="tbl-wrap"><table class="t"><thead><tr><th>연번</th><th>성명</th><th>${q.mode === 'score' ? '총점 입력' : '순위'}</th><th>교육공무원으로서의 태도(10)</th><th>학습지도(40)</th><th>생활지도(30)</th><th>전문성개발(5)</th><th>담당업무(15)</th><th>평가점(총점)(100)</th><th>등급</th></tr></thead><tbody>
+      ${T().map((p, k) => {
+        if (p.id === evId) return `<tr class="self"><td>${k + 1}</td><td class="l">${esc(p.name)}</td><td colspan="8">본인 — 평가하지 않음</td></tr>`;
+        const r = sh.rows.find(x => x.id === p.id);
+        const inp = q.mode === 'score'
+          ? `<input class="num ${r.bad ? 'bad' : ''}" data-qs="${evId}:${p.id}" value="${esc(q.scores?.[p.id] ?? '')}">`
+          : `<input class="rk ${r.dup || r.bad ? 'bad' : ''}" data-qr="${evId}:${p.id}" value="${esc(q.ranks?.[p.id] ?? '')}">`;
+        return `<tr><td>${k + 1}</td><td class="l">${esc(p.name)}</td><td>${inp}</td>${(r.el || [null, null, null, null, null]).map(v => `<td class="r">${f2(v)}</td>`).join('')}<td class="r"><b>${f2(r.total)}</b></td><td class="${gcls(DM.grade(r.total))}">${DM.grade(r.total)}</td></tr>`;
+      }).join('')}</tbody></table></div></div>`;
+  }
+
+  // ── 평가자용 독립 HTML 파일 ──
+  function evalFile(evId) {
+    const e = S.people.find(p => p.id === evId);
+    const payload = {
+      kind: 'dm-eval', ver: 1, school: S.info.school, year: S.info.year, from: S.info.from, to: S.info.to,
+      evaluator: { id: e.id, name: e.name }, roster: T().map(p => ({ id: p.id, name: p.name })), key: rosterKey()
+    };
+    S.evalKeys[evId] = rosterKey(); save();
+    const js = JSON.stringify(payload).replace(/</g, '\\u003c');
+    return EVAL_TEMPLATE.replace('__PAYLOAD__', () => js);
+  }
+  function importEvalResults(files) {
+    let ok = 0; const msgs = [];
+    files.forEach(f => {
+      let d; try { d = JSON.parse(f.text); } catch (e) { msgs.push(`${f.name}: 결과 파일 형식이 아닙니다.`); return; }
+      if (!d || d.kind !== 'dm-eval-result') { msgs.push(`${f.name}: 다면평가 결과 파일이 아닙니다.`); return; }
+      const ev = S.people.find(p => p.id === d.evaluator.id && p.evaluator);
+      if (!ev) { msgs.push(`${f.name}: 평가자 ‘${d.evaluator.name}’를 현재 명단의 다면평가자에서 찾을 수 없습니다.`); return; }
+      if (d.key !== rosterKey()) msgs.push(`${f.name}: 평가자용 파일을 만든 뒤 명단이 바뀌었습니다. 결과를 불러왔지만 반드시 확인하세요.`);
+      S.qual[ev.id] = { mode: d.mode === 'score' ? 'score' : 'rank', ranks: d.ranks || {}, scores: d.scores || {}, src: `파일: ${f.name} (${d.savedAt ? new Date(d.savedAt).toLocaleString('ko-KR') : ''})` };
+      ok++;
+    });
+    save(); render();
+    showDialog('결과 파일 불러오기', `<p>${ok}개 파일을 불러왔습니다.</p>${msgs.length ? `<div class="msg warn"><ul style="margin:0 0 0 18px">${msgs.map(m => `<li>${esc(m)}</li>`).join('')}</ul></div>` : ''}`);
+  }
+
+  // ════════════════════════════ 6. 정량평가 점수 ════════════════════════════
+  function vQuant() {
+    const C = DM.compute(S);
+    return `<h2>정량평가 점수 <small class="note">[서식2-1] 정량평가 방법에 따른 교사 다면평가 집계표</small></h2>
+    <p class="lead">다면평가자가 평정점을 부여하고 공동 서명해 제출한 [서식2]의 요소별 <b>소계</b>를 입력합니다. 정량평가는 동점이 허용됩니다.</p>
+    <div class="card"><div class="tbl-wrap"><table class="t"><thead><tr><th>연번</th><th>성명</th>${DM.QUANT.map(q => `<th>${q.name}<br>(${q.max})</th>`).join('')}<th>평가점(총점)<br>(100)</th><th>환산점<br>(×8/100)</th></tr></thead><tbody>
+    ${C.list.map(o => `<tr><td>${o.idx}</td><td class="l">${esc(o.name)}</td>${DM.QUANT.map((q, k) => {
+      const v = (S.quant[o.id] || [])[k]; const bad = v !== '' && v != null && (isNaN(v) || +v < 0 || +v > q.max);
+      return `<td><input class="num ${bad ? 'bad' : ''}" data-qn="${o.id}:${k}" value="${esc(v ?? '')}"></td>`;
+    }).join('')}<td class="r"><b>${f2(o.quantTotal)}</b></td><td class="r">${f2(o.quantConv)}</td></tr>`).join('')}
+    </tbody></table></div>
+    <p class="note">Tab·Enter 키로 다음 칸으로 이동합니다. 요소별 배점을 넘는 값은 붉게 표시됩니다.</p>
+    <div class="row"><button class="btn" data-print="form21">[서식2-1] 집계표 출력</button></div></div>
+    ${nav('qual', 'result')}`;
+  }
+
+  // ════════════════════════════ 7. 다면평가 결과 ════════════════════════════
+  function vResult() {
+    const mode = ui.resMode || (isRegular() ? 'promo' : 'perf');
+    const C = DM.compute(S, mode);
+    const qs = C.E.map(e => C.sheets[e.id]);
+    const notDone = C.E.filter(e => !C.sheets[e.id].complete).map(e => e.name);
+    const miss = C.list.filter(o => o.quantTotal == null).map(o => o.name);
+    const R = C.R;
+    return `<h2>다면평가 결과</h2>
+    <p class="lead">요소별 평균은 다면평가자 4인 이상이면 최고점·최저점을 1개씩 뺀 합계를 (평가자 수 − 2)로 나눕니다(소수 셋째 자리에서 반올림). 다면평가점 = 정성 평가점 × ${R.qual}/100 + 정량 평가점 × ${R.quant}/100.</p>
+    <div class="tabs">${isRegular() ? `<button data-resmode="promo" class="${mode === 'promo' ? 'on' : ''}">승진용 (정성 32 · 정량 8 = 40점)</button>` : ''}<button data-resmode="perf" class="${mode === 'perf' ? 'on' : ''}">개인성과급용 (정성 ${S.perfRate.qual} · 정량 ${S.perfRate.quant} = 100점)</button></div>
+    ${notDone.length ? `<div class="msg warn">정성평가 미완료: ${esc(notDone.join(', '))}</div>` : ''}${miss.length ? `<div class="msg warn">정량평가 미입력: ${esc(miss.join(', '))}</div>` : ''}
+    ${mode === 'perf' ? `<div class="row" style="margin-bottom:8px"><span class="note">성과급 반영 비율</span> 정성 <input class="num" data-rate="qual" value="${esc(S.perfRate.qual)}">% 정량 <input class="num" data-rate="quant" value="${esc(S.perfRate.quant)}">%</div>` : ''}
+    <div class="card"><div class="tbl-wrap"><table class="t"><thead><tr><th rowspan="2">연번</th><th rowspan="2">성명</th><th colspan="7">정성평가 [서식5 제1쪽]</th><th colspan="2">정량평가 [제3쪽]</th><th rowspan="2">다면평가<br>총점</th><th rowspan="2">순위</th></tr>
+      <tr>${DM.QUAL.map(q => `<th>${q.short}<br>(${q.max})</th>`).join('')}<th>평가점</th><th>환산점</th><th>평가점</th><th>환산점</th></tr></thead><tbody>
+      ${C.list.map(o => `<tr><td>${o.idx}</td><td class="l"><a href="#" data-detail="${o.id}">${esc(o.name)}</a></td>${o.qualEl.map(v => `<td class="r">${f2(v)}</td>`).join('')}<td class="r"><b>${f2(o.qualTotal)}</b></td><td class="r">${f2(o.qualConv)}</td><td class="r"><b>${f2(o.quantTotal)}</b></td><td class="r">${f2(o.quantConv)}</td><td class="r"><b>${f2(o.dmTotal)}</b></td><td>${o.dmTotalRank ?? ''}</td></tr>`).join('')}
+      </tbody></table></div><p class="note">이름을 누르면 요소별로 다면평가자가 준 점수와 제외된 최고·최저점을 볼 수 있습니다.</p></div>
+    ${nav('quant', isRegular() ? 'gp' : 'print')}`;
+  }
+  function detailDialog(id) {
+    const C = DM.compute(S); const o = C.byId[id];
+    const html = `<table class="t"><thead><tr><th>요소</th>${C.E.map(e => `<th>${esc(e.name)}</th>`).join('')}<th>계</th><th>평균</th></tr></thead><tbody>
+      ${DM.QUAL.map((q, k) => { const a = o.qualAgg[k]; let dropMax = a.dropped, dropMin = a.dropped;
+        return `<tr><td class="l">${q.name}(${q.max})</td>${o.qualBy.map(el => { if (!el) return '<td class="note">—</td>'; const v = el[k]; let s = '';
+          if (dropMax && v === a.max) { dropMax = false; s = 'text-decoration:line-through;color:#b42318'; } else if (dropMin && v === a.min) { dropMin = false; s = 'text-decoration:line-through;color:#1f4e8c'; }
+          return `<td class="r" style="${s}">${f2(v)}</td>`; }).join('')}<td class="r">${f2(a.sum)}</td><td class="r"><b>${f2(a.avg)}</b></td></tr>`; }).join('')}
+      </tbody></table><p class="note">${o.qualAgg[0].dropped ? '취소선: 집계에서 제외된 최고점(빨강)·최저점(파랑) — 동점이면 1개씩만 제외' : '다면평가자가 4인 미만이므로 최고·최저점을 제외하지 않습니다.'}</p>`;
+    showDialog(`${o.name} — 정성평가 요소별 집계`, html);
+  }
+
+  // ════════════════════════════ 8. 근무성적평정·합산 ════════════════════════════
+  function vGp() {
+    const C = DM.compute(S);
+    const ch = C.checks; const N = C.N;
+    const bj = DM.baejeong(N) || [0, 0, 0, 0];
+    const dbox = (title, c, ok) => `<div class="box ${ok === true ? 'good' : ok === false ? 'bad' : ''}"><h4>${title}</h4><div class="v">수 <b>${c ? c.수 : '-'}</b> · 우 <b>${c ? c.우 : '-'}</b> · 미 <b>${c ? c.미 : '-'}</b>${c && c.양 ? ` · 양 <b>${c.양}</b>` : ''}</div></div>`;
+    const d = ch.dist;
+    const notReady = C.list.filter(o => o.dmTotal == null).length;
+    const sortKey = ui.gpSort || 'input';
+    const nz = v => v == null ? Infinity : v;
+    const rows = C.list.slice().sort({
+      input: (a, b) => a.idx - b.idx,
+      total: (a, b) => nz(a.totalRank) - nz(b.totalRank) || a.idx - b.idx,
+      dm: (a, b) => nz(a.dmTotalRank) - nz(b.dmTotalRank) || a.idx - b.idx,
+      p: (a, b) => nz(a.gpP.rank) - nz(b.gpP.rank) || a.idx - b.idx,
+      q: (a, b) => nz(a.gpQ.rank) - nz(b.gpQ.rank) || a.idx - b.idx
+    }[sortKey] || ((a, b) => a.idx - b.idx));
+    return `<h2>근무성적평정·합산 <small class="note">[서식4]·[서식6]</small></h2>
+    <p class="lead">평정자(교감)·확인자(교장)가 순위를 매기면 조견표에 따라 요소별 점수(소수 셋째 자리 버림)가 부여됩니다. 근무성적평정점 60점 = 평정자 평정점 × 0.2 + 확인자 평정점 × 0.4, 총점 = 근평 60 + 다면 40.</p>
+    ${notReady ? `<div class="msg warn">다면평가 점수가 아직 없는 교사가 ${notReady}명 있습니다. 정성·정량평가를 먼저 마치세요.</div>` : ''}
+    <div class="card"><h3>평정 분포 점검 <small>평정인원 ${N}명 · 배정표 수 ${bj[0]} · 우 ${bj[1]} · 미 ${bj[2]} · 양 ${bj[3]} (양은 미에 포함 가능)</small></h3>
+      <div class="dist">
+        ${dbox('배정표(시행공문 붙임4)', { 수: bj[0], 우: bj[1], 미: bj[2] + bj[3], 양: 0 })}
+        ${dbox('⑧ 조정점 기준', d && d.adj)}
+        ${dbox('⑦ 총점 기준', d && d.total, d ? DM.distOK(d.total, N) && !ch.mismatch.length : undefined)}
+        ${dbox('평정자(교감) 평정점', d && d.p, d ? DM.distOK(d.p, N) : undefined)}
+        ${dbox('확인자(교장) 평정점', d && d.q, d ? DM.distOK(d.q, N) : undefined)}
+      </div>
+      ${ch.errors.length ? `<div class="msg err"><ul style="margin:0 0 0 18px">${ch.errors.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ch.done ? '<div class="msg ok"><b>모든 점검 통과</b> — ⑦총점 기준과 ⑧조정점 기준 등급이 일치하고, 평정자·확인자 분포와 동점 여부에 문제가 없습니다. [출력] 단계로 가세요.</div>' : ''}
+      ${ch.warns.length ? `<div class="msg warn"><ul style="margin:0 0 0 18px">${ch.warns.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}
+      <div class="row"><button class="btn pri" data-act="autoAdj">⚙ 평정분포 자동 맞추기(수동조정 자동 계산)</button>${ui.undoGp ? '<button class="btn" data-act="undoAuto">자동 맞추기 되돌리기</button>' : ''}<button class="btn" data-act="seedRanks">다면평가 순위로 교감·교장 순위 채우기</button><button class="btn" data-act="clearRanks">순위 모두 지우기</button><span class="spacer"></span><span class="note">순위만으로 맞지 않으면 ‘수동조정’에서 요소별 점수를 고칩니다(매뉴얼 5. 수동조정).</span></div>
+    </div>
+    <div class="card"><div class="row" style="margin-bottom:8px"><b>정렬</b>
+      ${[['input', '입력순(연번)'], ['total', '⑨ 순위순(총점 높은 순)'], ['dm', '다면평가 점수순'], ['p', '평정자 순위순'], ['q', '확인자 순위순']].map(([k, t]) => `<button class="btn sm ${sortKey === k ? 'pri' : ''}" data-gpsort="${k}">${t}</button>`).join('')}
+      <span class="note">화면 표시 순서만 바뀌며, 명단 순서(내부결재용 출력 순서)는 그대로입니다.</span></div>
+      <div class="tbl-wrap"><table class="t"><thead><tr>
+      <th rowspan="2">연번</th><th rowspan="2">성명</th><th rowspan="2">다면평가<br>환산점(40)</th>
+      <th colspan="3">평정자(${esc(S.info.vpTitle)})</th><th colspan="3">확인자(${esc(S.info.prTitle)})</th>
+      <th rowspan="2">⑦ 총점</th><th rowspan="2">⑨ 순위</th><th rowspan="2">⑧ 조정점<br><span class="mini">(참고)</span></th><th rowspan="2">⑦ 등급</th><th rowspan="2">⑧ 등급</th><th rowspan="2"></th></tr>
+      <tr><th>순위</th><th>평정점</th><th>환산(20)</th><th>순위</th><th>평정점</th><th>환산(40)</th></tr></thead><tbody>
+      ${rows.map(o => {
+        const mis = ch.mismatch && ch.mismatch.includes(o.id);
+        const dP = ch.gp.p.dup.includes(o.gpP.rank), dQ = ch.gp.q.dup.includes(o.gpQ.rank);
+        const g = S.gp[o.id] || {};
+        const open = ui.gpOpen[o.id];
+        return `<tr class="${mis ? 'err' : ''}"><td>${o.idx}</td><td class="l">${esc(o.name)}${o.person.discipline ? ` <span class="pill warn">${esc(o.person.discipline)}</span>` : ''}</td><td class="r">${f2(o.dmTotal)}</td>
+          <td><input class="rk ${dP ? 'bad' : ''}" data-gr="${o.id}:p" value="${esc(g.p ?? '')}"></td><td class="r ${gcls(o.gradeP)}" data-gpopen="${o.id}" style="cursor:pointer" title="눌러서 수동조정">${f2(o.gpP.score)}${o.gpP.manual ? ' ✎' : ''}</td><td class="r">${f2(o.gpP.conv)}</td>
+          <td><input class="rk ${dQ ? 'bad' : ''}" data-gr="${o.id}:q" value="${esc(g.q ?? '')}"></td><td class="r ${gcls(o.gradeQ)}" data-gpopen="${o.id}" style="cursor:pointer" title="눌러서 수동조정">${f2(o.gpQ.score)}${o.gpQ.manual ? ' ✎' : ''}</td><td class="r">${f2(o.gpQ.conv)}</td>
+          <td class="r"><b>${f2(o.total)}</b></td><td>${o.totalRank ?? ''}</td><td class="r">${f2(o.adj)}</td>
+          <td class="${gcls(o.gradeTotal)}">${o.gradeTotal}</td><td class="${gcls(o.gradeAdj)}">${o.gradeAdj}</td>
+          <td><button class="btn sm" data-gpopen="${o.id}">${open ? '닫기' : '수동조정'}</button></td></tr>
+          ${open ? `<tr><td colspan="16" style="background:#fafbfc;text-align:left">${manualEditor(o)}</td></tr>` : ''}`;
+      }).join('')}</tbody></table></div>
+      <p class="note">✎ 표시는 수동조정한 점수입니다. ⑧ 조정점은 ⑨순위에 따른 조견표 점수(참고용)이며, 실제 조정점·순위는 교육지원청에서 작성하므로 제출용 합산표에는 비워 둡니다.</p></div>
+    ${nav('result', 'print')}`;
+  }
+  function manualEditor(o) {
+    const h = DM.adjustHint(o) || {};
+    const g = S.gp[o.id] || {}; const ov = g.ov || {};
+    const rowFor = (w, label, gp) => `<tr><th class="l" style="text-align:left">${label}<div class="mini">순위 ${gp.rank ?? '-'}위 자동점수 ${f2(gp.auto.every(v => v != null) ? DM.add(...gp.auto) : null)}</div></th>
+      ${DM.QUAL.map((q, k) => { const m = ov[w]?.[k] != null && ov[w]?.[k] !== ''; return `<td><input class="num" style="width:74px;${m ? 'background:#fff4e0;border-color:#e0a84a;font-weight:700' : ''}" data-ov="${o.id}:${w}:${k}" value="${esc(m ? ov[w][k] : f2(gp.auto[k]))}" title="자동 점수 ${f2(gp.auto[k])}"></td>`; }).join('')}
+      <td class="r"><b>${f2(gp.score)}</b></td><td class="r">${f2(gp.conv)}</td><td class="${gcls(DM.grade(gp.score))}">${DM.grade(gp.score)}</td>
+      <td><div class="row" style="gap:4px;flex-wrap:nowrap"><input class="num" style="width:74px" data-tgt="${o.id}:${w}" placeholder="${f2(gp.score)}"><button class="btn sm" data-tgtapply="${o.id}:${w}">맞추기</button></div></td></tr>`;
+    return `<div style="padding:6px 4px">
+      <div class="row"><b>${esc(o.name)} 수동조정</b><span class="spacer"></span><button class="btn sm danger" data-ovclear="${o.id}">수동조정 지우기(자동 점수로 되돌림)</button></div>
+      <div class="msg info" style="margin:6px 0"><b>점수 바꾸는 방법</b> — ① 요소 칸(태도·학습지도…)의 숫자를 직접 고친 뒤 <b>Tab·Enter 키를 누르거나 다른 곳을 클릭</b>하면 평정점·환산점·총점이 다시 계산됩니다. 고친 칸은 주황색으로 표시됩니다.
+        ② 또는 오른쪽 <b>목표 평정점</b>에 원하는 평정점(100점 만점)을 넣고 [맞추기]를 누르면 차이만큼 학습지도 점수(모자라면 생활지도·담당업무)를 자동으로 고칩니다.
+        각 요소는 배점(10·40·30·5·15)을 넘을 수 없고, 평정자·확인자 각각의 수·우·미 분포가 배정표와 맞아야 하므로 아래 안내 범위 안에서 조정하세요.</div>
+      ${h.target ? `<div class="msg ${h.need ? 'warn' : 'ok'}" style="margin:6px 0">⑧ 조정점 기준 등급은 <b class="${gcls(h.target)}">${h.target}</b>(${h.band[0]}~${h.band[1]}점), 현재 총점 ${f2(o.total)}점(<b class="${gcls(o.gradeTotal)}">${o.gradeTotal}</b>).
+        ${h.need > 0 ? `총점을 <b>${f2(h.need)}점 이상</b> 낮춰야 합니다.` : h.need < 0 ? `총점을 <b>${f2(-h.need)}점 이상</b> 높여야 합니다.` : '등급이 일치합니다.'}
+        ${h.need >= 0 ? `평정자 평정점은 현재 등급을 유지하며 ${f2(h.pRoom)}점(환산 ${f2(h.pConvRoom)}점), 확인자 평정점은 ${f2(h.qRoom)}점(환산 ${f2(h.qConvRoom)}점)까지 낮출 수 있습니다. 순위가 바뀌지 않도록 바로 아래 순위 교사의 총점보다는 높게 두세요.`
+          : `평정자 평정점은 현재 등급을 유지하며 ${f2(h.pUp)}점(환산 ${f2(DM.round(h.pUp * 0.2, 2))}점), 확인자 평정점은 ${f2(h.qUp)}점(환산 ${f2(DM.round(h.qUp * 0.4, 2))}점)까지 올릴 수 있습니다. 순위가 바뀌지 않도록 바로 위 순위 교사의 총점보다는 낮게 두세요.`}</div>` : ''}
+      <table class="t" style="max-width:1000px"><thead><tr><th></th>${DM.QUAL.map(q => `<th>${q.short}(${q.max})</th>`).join('')}<th>평정점</th><th>환산점</th><th>등급</th><th>목표 평정점</th></tr></thead><tbody>
+        ${rowFor('p', `평정자(${esc(S.info.vpTitle)})`, o.gpP)}${rowFor('q', `확인자(${esc(S.info.prTitle)})`, o.gpQ)}</tbody></table></div>`;
+  }
+  /** 목표 평정점에 맞춰 요소 점수 조정: 학습지도 → 생활지도 → 담당업무 → 태도 → 전문성개발 순서로 배점 범위 안에서 차이를 흡수 */
+  function applyTarget(id, w, target) {
+    const C = DM.compute(S); const o = C.byId[id]; const gp = w === 'p' ? o.gpP : o.gpQ;
+    if (gp.score == null) return toast('먼저 순위를 입력하세요.');
+    if (!(target > 0 && target <= 100)) return toast('목표 평정점은 0~100 사이로 입력하세요.');
+    const el = gp.el.slice(); let diff = DM.round(target - gp.score, 2);
+    for (const k of [1, 2, 4, 0, 3]) {
+      if (!diff) break;
+      const max = DM.GP_F[k] * 100;
+      const nv = Math.min(max, Math.max(0, DM.round(el[k] + diff, 2)));
+      diff = DM.round(diff - (nv - el[k]), 2); el[k] = nv;
+    }
+    const g = S.gp[id] || (S.gp[id] = {}); g.ov = g.ov || {};
+    g.ov[w] = el.map((v, k) => v === gp.auto[k] ? null : v);
+    save(); render();
+    toast(diff ? `배점 한도 때문에 ${f2(Math.abs(diff))}점은 맞추지 못했습니다.` : `${w === 'p' ? '평정자' : '확인자'} 평정점을 ${f2(target)}점으로 맞췄습니다.`);
+  }
+
+  // ════════════════════════════ 9. 출력 ════════════════════════════
+  const DOCS = () => {
+    const reg = isRegular();
+    const Es = E();
+    const g = [];
+    g.push({ grp: '다면평가 준비·평가 자료(학교 보관)', items: [
+      { id: 'criteriaNotice', t: '정량평가 기준 공지 및 확인 서명부', s: '전체 교원 확인 서명' },
+      { id: 'form2blank', t: '[서식2] 개인별 세부평가표(배부용)', s: '평가대상자 수만큼, 평가자 이름 없음' },
+      { id: 'form2keep', t: '[서식2] 개인별 세부평가표(보관용)', s: '다면평가자 공동 서명란 포함' },
+      ...Es.map(e => ({ id: 'form1:' + e.id, t: `[서식1] 다면평가자별 평가표 — ${e.name}`, s: '다면평가자 서명' }))] });
+    g.push({ grp: '내부결재용(입력순, 평정자·확인자 날인)', items: [
+      ...DM.QUAL.map((q, k) => ({ id: 'form11:' + k, t: `[서식1-1] 요소별 집계표 — ${q.name}`, s: '정성 요소별 집계' })),
+      { id: 'form21', t: '[서식2-1] 정량평가 집계표', s: '' },
+      ...(reg ? [
+        { id: 'form5p1', t: '[서식5 제1쪽] 정성 교사 다면평가표 (32)', s: '' },
+        { id: 'form5p3', t: '[서식5 제3쪽] 정량 교사 다면평가표 (8)', s: '' },
+        { id: 'form5p5', t: '[서식5 제5쪽] 교사 다면평가 합산표 (32·8)', s: '' },
+        { id: 'form4', t: '[서식4] 교사 근무성적평정 집계', s: '총점 60점 이하' }] : [])] });
+    if (reg) g.push({ grp: '교육지원청 제출용(순위 정렬, 직위·성명 수기 기재·날인)', items: [
+      { id: 'sub:form5p1', t: '정성 교사 다면평가표(순위 정렬)', s: '' },
+      { id: 'sub:form5p3', t: '정량 교사 다면평가표(순위 정렬)', s: '' },
+      { id: 'sub:form5p5', t: '교사 다면평가 합산표(순위 정렬)', s: '' },
+      { id: 'sub:form4', t: '교사 근무성적평정표(순위 정렬)', s: '' },
+      { id: 'sub:form6', t: '[서식6] 교사 근무성적평정 및 다면평가 합산표', s: '⑧조정점·⑨순위 빈칸(수기 기재)' }] });
+    g.push({ grp: `개인성과급용(정성 ${S.perfRate.qual} · 정량 ${S.perfRate.quant})`, items: [
+      { id: 'perf:form5p1', t: `정성 교사 다면평가표 (${S.perfRate.qual})`, s: '' },
+      { id: 'perf:form5p3', t: `정량 교사 다면평가표 (${S.perfRate.quant})`, s: '' },
+      { id: 'perf:form5p5', t: `교사 다면평가 합산표 (100점)`, s: '' }] });
+    if (reg) g.push({ grp: '내부 확인용(제출하지 않음)', items: [{ id: 'check:form6', t: '합산 점검표(조정점·순위·등급 참고값 표시)', s: '분포 일치 확인' }] });
+    return g;
+  };
+  function vPrint() {
+    const groups = DOCS();
+    const all = groups.flatMap(g => g.items.map(i => i.id));
+    if (!ui.printSel) ui.printSel = [];
+    ui.printSel = ui.printSel.filter(id => all.includes(id));
+    return `<h2>출력</h2>
+    <p class="lead">출력할 서식을 고른 뒤 [미리보기] → [인쇄]를 누릅니다. 인쇄 창에서 용지 A4, 배율 ‘기본값’, ‘머리글/바닥글’ 해제, ‘배경 그래픽’ 선택을 권장합니다. PDF로 저장할 수도 있습니다.</p>
+    <div class="card">${groups.map((g, gi) => `<div style="margin-bottom:14px"><div class="row" style="margin-bottom:6px"><b>${g.grp}</b><button class="btn sm" data-selgrp="${gi}">묶음 전체 선택</button></div>
+      <div class="doclist">${g.items.map(it => `<label><input type="checkbox" data-sel="${it.id}" ${ui.printSel.includes(it.id) ? 'checked' : ''}><span>${esc(it.t)}${it.s ? `<small>${esc(it.s)}</small>` : ''}</span></label>`).join('')}</div></div>`).join('')}
+      <div class="row"><button class="btn" data-act="selNone">선택 해제</button><span class="spacer"></span><button class="btn" data-act="preview">미리보기</button><button class="btn pri" data-act="doPrint">인쇄</button></div></div>
+    <div id="printZone"><div id="preview">${ui.printSel.length ? buildDocs(ui.printSel) : '<p style="color:#fff;text-align:center;margin:40px">서식을 선택하고 [미리보기]를 누르세요.</p>'}</div></div>`;
+  }
+
+  // ── 서식 공통 요소 ──
+  const periodTxt = () => `${S.info.from}부터\n${S.info.to}까지`;
+  const sigCell = (title, name, blank) => blank ? `직위<br><br>성명 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(인)` : `직위 ${esc(title)}<br>성명 ${esc(name)} (인)`;
+  function hdr3(blank) {
+    return `<table class="hdr" style="margin-bottom:2mm"><tr><th style="width:30%">① 평가기간</th><th>② 확인자</th><th>③ 평정자</th></tr>
+      <tr><td style="white-space:pre-line">${esc(periodTxt())}</td><td style="height:13mm">${sigCell(S.info.prTitle, S.info.prName, blank)}</td><td>${sigCell(S.info.vpTitle, S.info.vpName, blank)}</td></tr></table>`;
+  }
+  const distTxt = `가. 수(95점 이상) 30퍼센트\n    나. 우(90점 이상 95점 미만) 40퍼센트\n    다. 미(85점 이상 90점 미만) 20퍼센트\n    라. 양(85점 미만) 10퍼센트`;
+  const signVPPR = () => `<div class="sig"><span>∘평정자 ${esc(S.info.vpTitle)} ${esc(S.info.vpName)} (인)</span><span>∘확인자 ${esc(S.info.prTitle)} ${esc(S.info.prName)} (인)</span></div>`;
+  const A4 = '<div class="foot">210mm×297mm(백상지 80g/㎡)</div>';
+  const chunk = (arr, n) => { const out = []; for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n)); return out.length ? out : [[]]; };
+  const school = () => esc(S.info.school);
+
+  function buildDocs(ids) {
+    const Cp = DM.compute(S, 'promo'), Cf = DM.compute(S, 'perf');
+    const order = Cp.list.slice().sort((a, b) => (a.totalRank ?? 999) - (b.totalRank ?? 999) || a.idx - b.idx);
+    return ids.map(id => {
+      try {
+        if (id === 'criteriaNotice') return docCriteriaNotice();
+        if (id === 'form2blank') return docForm2(false);
+        if (id === 'form2keep') return docForm2(true);
+        if (id.startsWith('form1:')) return docForm1(Cp, id.slice(6));
+        if (id.startsWith('form11:')) return docForm11(Cp, +id.slice(7));
+        if (id === 'form21') return docForm21(Cp);
+        const [pre, f] = id.includes(':') ? id.split(':') : ['int', id];
+        const C = pre === 'perf' ? Cf : Cp;
+        const list = pre === 'sub' ? order : C.list;
+        const opt = { blank: pre === 'sub', sorted: pre === 'sub', perf: pre === 'perf', check: pre === 'check' };
+        if (f === 'form5p1') return docForm5p1(C, list, opt);
+        if (f === 'form5p3') return docForm5p3(C, list, opt);
+        if (f === 'form5p5') return docForm5p5(C, list, opt);
+        if (f === 'form4') return docForm4(Cp, list, opt);
+        if (f === 'form6') return docForm6(Cp, order, opt);
+      } catch (e) { console.error(e); return `<div class="page"><p>출력 오류: ${esc(e.message)}</p></div>`; }
+      return '';
+    }).join('');
+  }
+
+  function docCriteriaNotice() {
+    const C = S.criteria;
+    const tbl = critTable(null, false);
+    const people = T();
+    const rows = chunk(people, 2).map(pair => `<tr>${pair.map((p, k) => `<td>${people.indexOf(p) + 1}</td><td>${esc(p.name)}</td><td style="height:9mm"></td>`).join('')}${pair.length < 2 ? '<td></td><td></td><td></td>' : ''}</tr>`).join('');
+    return `<div class="page"><p class="flabel">학교보관</p><h1>${esc(S.info.year)}학년도 교사 다면평가 정량평가 세부기준</h1>
+      <p class="sub">기관명: ${school()} · 평가기간: ${esc(S.info.from)}~${esc(S.info.to)}</p>${tbl}
+      <p class="sub" style="margin-top:3mm">※ 평가 내용 및 세부 기준은 전체 교원 의견 수렴과 다면평가관리위원회 심의를 거쳐 확인자가 결정하였으며, 평가요소와 배점은 변경할 수 없습니다.</p></div>
+      <div class="page"><h1>정량평가 세부기준 확인 서명부</h1><p class="sub">위 「${esc(S.info.year)}학년도 교사 다면평가 정량평가 세부기준」을 확인하였습니다. (${school()})</p>
+      <table><thead><tr><th style="width:8%">연번</th><th style="width:20%">성명</th><th style="width:22%">서명</th><th style="width:8%">연번</th><th style="width:20%">성명</th><th style="width:22%">서명</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="sig" style="margin-top:8mm"><span>다면평가관리위원회 위원장 ${esc(S.info.vpTitle)} ${esc(S.info.vpName)} (인)</span></div></div>`;
+  }
+  function critTable(person, withScore) {
+    const C = S.criteria;
+    let body = '';
+    C.sections.forEach((sec, si) => {
+      const rows = [];
+      sec.items.forEach(it => it.levels.forEach((lv, li) => rows.push({ it, lv, first: li === 0, n: it.levels.length })));
+      if (!rows.length) rows.push({ it: { title: '' }, lv: { d: '', s: '' }, first: true, n: 1 });
+      rows.forEach((r, k) => {
+        body += `<tr>${k === 0 ? `<td rowspan="${rows.length + 1}">${'가나다라'[si]}.<br>${sec.name}<br>(${sec.max}점)</td>` : ''}
+          ${r.first ? `<td class="l" rowspan="${r.n}">${esc(r.it.title)}</td>` : ''}<td class="l">${esc(r.lv.d)}</td><td>${esc(r.lv.s)}</td>
+          ${withScore ? (r.first ? `<td rowspan="${r.n}"></td><td rowspan="${r.n}"></td>` : '') : ''}</tr>`;
+      });
+      body += `<tr><td colspan="3"><b>소 계</b></td>${withScore ? '<td></td><td></td>' : ''}</tr>`;
+    });
+    body += `<tr><td colspan="${withScore ? 4 : 3}"><b>평가점(총점)(100점)</b></td>${withScore ? '<td></td><td></td>' : '<td></td>'}</tr>`;
+    return `<table class="${withScore ? 'tight' : ''}"><thead><tr><th style="width:12%">평가요소</th><th colspan="2">평가 내용 및 세부 기준</th><th style="width:7%">점수</th>${withScore ? '<th style="width:22%">실적내용<br>(본인기재)</th><th style="width:9%">평정점</th>' : ''}</tr></thead><tbody>${body}</tbody></table>`;
+  }
+  function docForm2(keep) {
+    const Es = E();
+    return T().map(p => {
+      const sigs = keep
+        ? chunk(Es, 4).map(g => `<tr>${g.map((e, k) => `<td style="height:9mm">다면평가자${Es.indexOf(e) + 1} ${esc(e.name)} (인)</td>`).join('')}${Es.length > 4 ? '<td></td>'.repeat(4 - g.length) : ''}</tr>`).join('')
+        : chunk(Es, 4).map(g => `<tr>${g.map(e => `<td style="height:9mm">다면평가자${Es.indexOf(e) + 1} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(인)</td>`).join('')}${Es.length > 4 ? '<td></td>'.repeat(4 - g.length) : ''}</tr>`).join('');
+      return `<div class="page"><p class="flabel">[서식 2] 학교보관</p><h1 style="font-size:13pt">정량평가 방법에 따른 교사 다면평가 평가대상자별 세부평가표</h1>
+        <p class="sub">소속: ${school()} &nbsp;&nbsp; 직위: ${esc(p.kind === '교사' ? '교사' : p.kind)} &nbsp;&nbsp; 성명: ${esc(p.name)} (인)</p>
+        ${critTable(p, true)}
+        <p class="sub" style="margin:3mm 0 1mm"><b>&lt;다면평가자 확인&gt;</b></p><table><tbody>${sigs}</tbody></table>
+        <div class="sig"><span>다면평가관리위원회 위원장 귀하</span></div>
+        <p class="note" style="font-size:8pt;margin-top:2mm">※ 평가 내용 및 세부기준 점수는 학교에서 정함. 단, 평가요소 및 평가배점 변경 불가.</p></div>`;
+    }).join('');
+  }
+  function docForm1(C, evId) {
+    const e = S.people.find(p => p.id === evId); if (!e) return '';
+    const sh = C.sheets[evId];
+    const pages = chunk(T(), 30);
+    return pages.map((pg, pi) => `<div class="page"><p class="flabel">[서식 1] 학교보관</p><h1 style="font-size:13pt">정성(定性)평가 방법에 따른 다면평가자별 교사 다면평가표</h1>
+      <p class="sub" style="text-align:right">∘ 다면평가자 성명: ${esc(e.name)} (인)</p>
+      <table><thead><tr><th colspan="2">평가대상자</th><th colspan="5">평가사항: 근무수행태도, 근무실적 및 근무수행능력</th><th rowspan="2">평가점<br>(총점)<br>(100)</th></tr>
+      <tr><th style="width:7%">연번</th><th style="width:14%">성명</th><th>교육공무원으로<br>서의 태도(10)</th><th>학습지도<br>(40)</th><th>생활지도<br>(30)</th><th>전문성개발<br>(5)</th><th>담당업무<br>(15)</th></tr></thead><tbody>
+      ${pg.map(p => { const k = T().indexOf(p) + 1; if (p.id === evId) return `<tr><td>${k}</td><td>${esc(p.name)}</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+        const r = sh.rows.find(x => x.id === p.id) || {}; return `<tr><td>${k}</td><td>${esc(p.name)}</td>${(r.el || [null, null, null, null, null]).map(v => `<td>${f2(v)}</td>`).join('')}<td>${f2(r.total)}</td></tr>`; }).join('')}
+      </tbody></table>
+      ${pi === pages.length - 1 ? `<div class="remark">○ 다면평가자는 본인 평가를 실시하지 않음
+○ 다면평가점(총점)은 등급별 분포비율에 맞춰 상대평가 실시(강제배분)
+    - 수(95점 이상) 30퍼센트  - 우(90점 이상 95점 미만) 40퍼센트  - 미(85점 이상 90점 미만) 20퍼센트  - 양(85점 미만) 10퍼센트
+   ※ 평가점 ‘양’에 해당하는 자가 없거나, 그 비율 이하일 때에는 ‘양’의 비율을 ‘미’에 가산
+○ 평가점은 특별한 사정이 없으면 동점을 주지 않도록 해야 함</div>` : ''}</div>`).join('');
+  }
+  function docForm11(C, k) {
+    const q = DM.QUAL[k]; const Es = C.E;
+    const cls = Es.length > 8 ? 'xtight' : Es.length > 5 ? 'tight' : '';
+    const pages = chunk(C.list, 30);
+    return pages.map((pg, pi) => `<div class="page"><p class="flabel">[서식 1-1] 학교보관</p><h1 style="font-size:13pt">정성(定性)평가 방법에 따른 교사 다면평가 평가요소별 집계표</h1>
+      <p class="sub" style="text-align:center">- 평가요소: ${q.name}(${q.max}점) -</p><p class="sub">기관명: ( ${school()} )</p>
+      <table class="${cls}"><thead><tr><th colspan="2">평가대상자</th><th colspan="${Es.length}">다면평가자별 평가점</th><th rowspan="2">계</th><th rowspan="2">평균<br>(${q.max}점)</th></tr>
+      <tr><th style="width:6%">연번</th><th style="width:12%">성명</th>${Es.map(e => `<th>${esc(e.name)}</th>`).join('')}</tr></thead><tbody>
+      ${pg.map(o => `<tr><td>${o.idx}</td><td>${esc(o.name)}</td>${o.qualBy.map(el => `<td>${el ? f2(el[k]) : ''}</td>`).join('')}<td>${f2(o.qualAgg[k].sum)}</td><td>${f2(o.qualAgg[k].avg)}</td></tr>`).join('')}
+      </tbody></table>
+      ${pi === pages.length - 1 ? `<div class="remark">○ 집계표는 정성평가 각 요소별로 작성(5개 요소)
+○ 다면평가자별 평가점은 [서식 1]의 해당 평가 요소별 평가점을 그대로 기재
+○ ‘계’는 다면평가자의 최고점과 최저점을 제외한 점수의 합계(다면평가자 수가 4인 이상인 경우만 적용)
+○ ‘평균’은 ‘계÷다면평가자수(최고점과 최저점을 부여한 2인 제외)’</div>${signVPPR()}` : ''}</div>`).join('');
+  }
+  function docForm21(C) {
+    const Es = C.E;
+    const pages = chunk(C.list, 32);
+    return pages.map((pg, pi) => `<div class="page"><p class="flabel">[서식 2-1] 학교보관</p><h1 style="font-size:13pt">정량(定量)평가 방법에 따른 교사 다면평가 집계표</h1>
+      ${pi === 0 ? `<div style="columns:2;font-size:9.5pt;margin:2mm 0 3mm">${Es.map(e => `<div style="margin:1mm 0">∘ 다면평가자 성명: ${esc(e.name)} (인)</div>`).join('')}</div>` : ''}
+      <table><thead><tr><th colspan="2">평가대상자</th><th colspan="4">평가사항: 근무실적 및 근무수행능력</th><th rowspan="2">평가점<br>(총점)<br>(100)</th></tr>
+      <tr><th style="width:7%">연번</th><th style="width:15%">성명</th>${DM.QUANT.map(q => `<th>${q.name}<br>(${q.max})</th>`).join('')}</tr></thead><tbody>
+      ${pg.map(o => `<tr><td>${o.idx}</td><td>${esc(o.name)}</td>${o.quantEl.map(v => `<td>${fnum(v)}</td>`).join('')}<td>${fnum(o.quantTotal)}</td></tr>`).join('')}</tbody></table>
+      ${pi === pages.length - 1 ? `<div class="sig"><span>다면평가관리위원회 위원장 귀하</span></div>` : ''}</div>`).join('');
+  }
+  const rateOf = (C, which) => which === 'qual' ? C.R.qual : C.R.quant;
+  const titleSuffix = opt => opt.perf ? ' <span style="font-size:10pt">(개인성과급용)</span>' : '';
+  function docForm5p1(C, list, opt) {
+    const r = rateOf(C, 'qual');
+    const pages = chunk(list, 26);
+    return pages.map((pg, pi) => `<div class="page"><p class="flabel">[서식 5] (제28조의3제1항 관련)\n■ 교육공무원 승진규정 [별지 제4호의2서식] &lt;개정 2016. 12. 30.&gt;</p><span class="fpage">(제1쪽)</span>
+      <h1>정성(定性)평가 방법에 따른 교사 다면평가표${titleSuffix(opt)}</h1>${hdr3(opt.blank)}
+      <table class="tight"><thead><tr><th colspan="3" rowspan="2">평가사항<br>평가요소</th><th>태도</th><th colspan="4">근무실적 및 근무수행능력</th><th rowspan="3">⑨<br>평가점</th><th rowspan="3">⑩<br>환산점</th>${opt.sorted || opt.check ? '' : '<th rowspan="3">순위</th>'}</tr>
+      <tr><th rowspan="2">④ 교육<br>공무원으로서의<br>태도(10점)</th><th rowspan="2">⑤ 학습<br>지도<br>(40점)</th><th rowspan="2">⑥ 생활<br>지도<br>(30점)</th><th rowspan="2">⑦ 전문성<br>개발<br>(5점)</th><th rowspan="2">⑧ 담당<br>업무<br>(15점)</th></tr>
+      <tr><th>평가대상자<br>소속</th><th>평가대상자<br>성명</th><th></th></tr></thead><tbody>
+      ${pg.map(o => `<tr><td>${school()}</td><td>${esc(o.name)}</td><td>다면평가자</td>${o.qualEl.map(v => `<td>${f2(v)}</td>`).join('')}<td>${f2(o.qualTotal)}</td><td>${f2(o.qualConv)}</td>${opt.sorted || opt.check ? '' : `<td>${o.totalRank ?? ''}</td>`}</tr>`).join('')}</tbody></table>
+      ${pi === pages.length - 1 ? `<div class="remark">비고
+  1. 환산점 = 평가점 × ${r}/100
+  2. 다면평가자는 다음 각 목의 분포비율에 맞도록 평가해야 하며, 평가점은 특별한 사정이 없으면 동점을 주지 않도록 해야 한다. 다만, 라목의 평정점에 해당하는 사람이 없거나 라목의 평정점에 해당하는 사람의 비율이 10퍼센트 이하일 때에는 라목의 비율을 적용하지 않고 다목에 가산할 수 있다.
+    ${distTxt}
+  3. 근무성적의 평정자 및 확인자가 서명날인한다.</div>${A4}` : ''}</div>`).join('');
+  }
+  function docForm5p3(C, list, opt) {
+    const r = rateOf(C, 'quant');
+    const pages = chunk(list, 26);
+    return pages.map((pg, pi) => `<div class="page"><p class="flabel">[서식 5] (제28조의3제1항 관련)\n■ 교육공무원 승진규정 [별지 제4호의2서식]</p><span class="fpage">(제3쪽)</span>
+      <h1>정량(定量)평가 방법에 따른 교사 다면평가표${titleSuffix(opt)}</h1>${hdr3(opt.blank)}
+      <table class="tight"><thead><tr><th colspan="3" rowspan="2">평가사항<br>평가요소</th><th colspan="4">근무실적 및 근무수행능력</th><th rowspan="3">⑧<br>평가점</th><th rowspan="3">⑨<br>환산점</th>${opt.sorted ? '' : '<th rowspan="3">순위</th>'}</tr>
+      <tr><th rowspan="2">④ 학습지도<br>(30점)</th><th rowspan="2">⑤ 생활지도<br>(30점)</th><th rowspan="2">⑥ 전문성개발<br>(10점)</th><th rowspan="2">⑦ 담당업무<br>(30점)</th></tr>
+      <tr><th>평가대상자<br>소속</th><th>평가대상자<br>성명</th><th></th></tr></thead><tbody>
+      ${pg.map(o => `<tr><td>${school()}</td><td>${esc(o.name)}</td><td>다면평가자</td>${o.quantEl.map(v => `<td>${fnum(v)}</td>`).join('')}<td>${fnum(o.quantTotal)}</td><td>${f2(o.quantConv)}</td>${opt.sorted ? '' : `<td>${o.totalRank ?? ''}</td>`}</tr>`).join('')}</tbody></table>
+      ${pi === pages.length - 1 ? `<div class="remark">비고
+  1. 환산점 = 평가점 × ${r}/100
+  2. 근무성적의 평정자 및 확인자가 서명날인한다.</div>${A4}` : ''}</div>`).join('');
+  }
+  function docForm5p5(C, list, opt) {
+    const pages = chunk(list, 30);
+    return pages.map((pg, pi) => `<div class="page"><p class="flabel">[서식 5] (제28조의3제1항 관련)\n■ 교육공무원 승진규정 [별지 제4호의2서식]</p><span class="fpage">(제5쪽)</span>
+      <h1>교사 다면평가 합산표${titleSuffix(opt)}</h1>${hdr3(opt.blank)}
+      <p class="sub" style="text-align:right">적용 환산점 백분율: 정성 ${C.R.qual} · 정량 ${C.R.quant}</p>
+      <table><thead><tr>${opt.sorted ? '' : '<th rowspan="2" style="width:8%">순위</th>'}<th rowspan="2">평가 대상자<br>소속</th><th rowspan="2">평가 대상자<br>성명</th><th colspan="2">④ 환산점</th><th rowspan="2">⑤ 총점</th></tr>
+      <tr><th>정성평가</th><th>정량평가</th></tr></thead><tbody>
+      ${pg.map(o => `<tr>${opt.sorted ? '' : `<td>${o.totalRank ?? ''}</td>`}<td>${school()}</td><td>${esc(o.name)}</td><td>${f2(o.qualConv)}</td><td>${f2(o.quantConv)}</td><td>${f2(o.dmTotal)}</td></tr>`).join('')}</tbody></table>
+      ${pi === pages.length - 1 ? A4 : ''}</div>`).join('');
+  }
+  function docForm4(C, list, opt) {
+    const pages = chunk(list, 14);
+    return pages.map((pg, pi) => `<div class="page"><p class="flabel">[서식 4] (제28조의3제1항 관련)\n■ 교육공무원 승진규정 [별지 제4호서식] &lt;개정 2015.12.31.&gt;</p><span class="fpage">(앞쪽)</span>
+      <h1>교사 근무성적평정${opt.sorted ? '표' : ' 집계'}</h1>${hdr3(opt.blank)}
+      <table class="tight"><thead><tr><th colspan="3" rowspan="2">평정사항<br>평정요소</th><th>근무수행태도</th><th colspan="4">근무실적 및 근무수행능력</th><th rowspan="3">⑨<br>평정점</th><th rowspan="3">⑩<br>환산점</th><th rowspan="3">⑪<br>총점</th></tr>
+      <tr><th rowspan="2">④ 교육<br>공무원으로서의<br>태도(10점)</th><th rowspan="2">⑤ 학습지도<br>(40점)</th><th rowspan="2">⑥ 생활지도<br>(30점)</th><th rowspan="2">⑦ 전문성<br>개발(5점)</th><th rowspan="2">⑧ 담당업무<br>(15점)</th></tr>
+      <tr><th>평정대상자<br>소속</th><th>평정대상자<br>성명</th><th></th></tr></thead><tbody>
+      ${pg.map(o => `<tr><td rowspan="2">${school()}</td><td rowspan="2">${esc(o.name)}</td><td>평정자</td>${o.gpP.el.map(v => `<td>${f2(v)}</td>`).join('')}<td>${f2(o.gpP.score)}</td><td>${f2(o.gpP.conv)}</td><td rowspan="2">${f2(o.gpTotal)}</td></tr>
+        <tr><td>확인자</td>${o.gpQ.el.map(v => `<td>${f2(v)}</td>`).join('')}<td>${f2(o.gpQ.score)}</td><td>${f2(o.gpQ.conv)}</td></tr>`).join('')}</tbody></table>
+      ${pi === pages.length - 1 ? `<div class="remark">비고
+  1. 평정자의 환산점 = 평정점 × 20/100, 확인자의 환산점 = 평정점 × 40/100
+  2. 평정자와 확인자는 다음 각 목의 분포비율에 맞도록 평정해야 하며, 평정점은 특별한 사정이 없으면 동점을 주지 않도록 해야 한다. 다만, 라목의 평정점에 해당하는 사람이 없거나 라목의 평정점에 해당하는 사람의 비율이 10퍼센트 이하일 때에는 라목의 비율을 적용하지 않고 다목에 가산할 수 있다.
+    ${distTxt}</div>${A4}` : ''}</div>`).join('');
+  }
+  function docForm6(C, list, opt) {
+    const show = opt.check;
+    const pages = chunk(list, 10);
+    const N = C.N;
+    return pages.map((pg, pi) => `<div class="page">${show ? '<span class="watermark">내부 확인용 — 제출 금지</span>' : ''}<p class="flabel">[서식 6] (제28조의3제1항 관련)\n■ 교육공무원 승진규정 [별지 제4호의3서식] &lt;개정 2012.11.6&gt;</p>
+      <h1>교사 근무성적평정 및 다면평가 합산표</h1>
+      <table class="hdr" style="margin-bottom:2mm"><tr><th style="width:18%">① 평정기간</th><th style="width:28%">② 평정 분포비율</th><th>③ 조정자</th><th>④ 확인자</th><th>⑤ 평정자</th></tr>
+      <tr><td style="white-space:pre-line">${esc(periodTxt())}</td><td class="l" style="font-size:8pt">∘수(95점 이상) 30%<br>∘우(90점 이상 95점 미만) 40%<br>∘미(85점 이상 90점 미만) 20%<br>∘양(85점 미만) 10%</td>
+      <td>${sigCell(S.info.dirTitle, S.info.dirName, !show)}</td><td>${sigCell(S.info.prTitle, S.info.prName, !show)}</td><td>${sigCell(S.info.vpTitle, S.info.vpName, !show)}</td></tr></table>
+      <table class="tight"><thead><tr><th rowspan="2" style="width:12%">평정<br>대상자<br>소속</th><th rowspan="2" style="width:12%">평정<br>대상자<br>성명</th><th colspan="6">점수 및 순위</th>${show ? '<th rowspan="2">평어</th>' : ''}</tr>
+      <tr><th colspan="2">평정 종류</th><th>⑥ 환산점</th><th>⑦ 총점</th><th>⑧ 조정점</th><th>⑨ 순위</th></tr></thead><tbody>
+      ${pg.map(o => `<tr><td rowspan="3">${school()}</td><td rowspan="3">${esc(o.name)}</td><td rowspan="2">근무성적<br>평정</td><td>평정자</td><td>${f2(o.gpP.conv)}</td><td rowspan="3">${f2(o.total)}</td><td rowspan="3">${show ? f2(o.adj) : ''}</td><td rowspan="3">${show ? `${o.totalRank}/${N}` : ''}</td>${show ? `<td rowspan="3">${o.gradeAdj}${o.gradeAdj !== o.gradeTotal ? `<br><span style="color:#b42318">(총점 ${o.gradeTotal})</span>` : ''}</td>` : ''}</tr>
+        <tr><td>확인자</td><td>${f2(o.gpQ.conv)}</td></tr><tr><td colspan="2">다면평가</td><td>${f2(o.dmTotal)}</td></tr>`).join('')}</tbody></table>
+      ${pi === pages.length - 1 ? `${show && C.checks.dist ? `<p class="sub" style="margin-top:3mm">평정인원 ${N}명 · ⑧조정점 기준 수 ${C.checks.dist.adj.수}/우 ${C.checks.dist.adj.우}/미 ${C.checks.dist.adj.미 + C.checks.dist.adj.양} · ⑦총점 기준 수 ${C.checks.dist.total.수}/우 ${C.checks.dist.total.우}/미 ${C.checks.dist.total.미 + C.checks.dist.total.양}</p>` : ''}
+        ${show ? '' : '<p class="sub" style="margin-top:2mm;font-size:8.5pt">※ ⑧조정점, ⑨순위는 교육지원청 작성(빈칸으로 제출). 순위는 평정인원이 5명일 경우 1/5, 2/5 … 로 기재.</p>'}<div class="foot">210mm×297mm[백상지 80g/㎡(재활용품)]</div>` : ''}</div>`).join('');
+  }
+
+  // ── 연습 자료 35명: 다면평가자 7명(4인 이상 → 최고·최저 제외), 교감·교장 순위까지 입력,
+  //    ⑦·⑧ 등급이 1명(황준서) 어긋나게 만들어 수동조정을 연습하도록 구성 ──
+  function sample35(seed){
+    let x=seed>>>0; const rnd=()=>{x^=x<<13;x>>>=0;x^=x>>>17;x^=x<<5;x>>>=0;return x/4294967296;};
+    const names=['김민준','이서연','박지훈','최수빈','정예은','강도윤','조하은','윤시우','장지민','임서준','한유진','오승현','서지아','신동현','권나연','황준서','안소율','송민재','전하린','홍재원','유채원','고태윤','문수아','양현우','손다은','배지호','백서윤','허건우','남지유','심우진','노예린','하은호','곽서아','성민혁','차윤서'];
+    const kinds={8:'보건교사',17:'영양교사',26:'특수교사',31:'전문상담교사'};
+    const evIdx=[2,7,12,16,21,27,33];
+    const lat=names.map(()=>rnd());
+    const s=blankState(); Object.assign(s.info,{school:'한빛초등학교',vpName:'김교감',prName:'이교장',dirName:'박과장'});
+    names.forEach((n,i)=>{const id='sy'+String(i).padStart(2,'0');
+      s.people.push({id,name:n,birth:String(650101+Math.floor(rnd()*300000)).slice(0,6),kind:kinds[i]||'교사',target:true,evaluator:evIdx.includes(i),discipline:'',note:''});
+      const q=lat[i]; const sec=[30,30,10,30].map(m=>Math.max(Math.round(m*0.7),Math.min(m,Math.round(m*(0.8+0.2*q)+(rnd()*2-1)*m/30*1.5))));
+      s.quant[id]=sec;});
+    const ids=s.people.map(p=>p.id);
+    evIdx.forEach(e=>{const ev=ids[e]; const others=ids.filter(v=>v!==ev);
+      const sc=others.map(o=>({o,v:lat[ids.indexOf(o)]+ (rnd()-0.5)*0.18})).sort((a,b)=>b.v-a.v);
+      const r={}; sc.forEach((z,k)=>r[z.o]=k+1); s.qual[ev]={mode:'rank',ranks:r,src:'연습 자료(35명)'};});
+    const mk=(noise)=>{const sc=ids.map(o=>({o,v:lat[ids.indexOf(o)]+(rnd()-0.5)*noise})).sort((a,b)=>b.v-a.v);const r={};sc.forEach((z,k)=>r[z.o]=k+1);return r;};
+    const P=mk(0.1),Q=mk(0.1); ids.forEach(o=>s.gp[o]={p:P[o],q:Q[o]});
+    return s;
+  }
+  
+  
+  // ── 대화상자 ──
+  function showDialog(title, body, foot) {
+    const d = $('#dlg');
+    d.innerHTML = `<div class="dh"><h3>${esc(title)}</h3><span class="spacer"></span><button class="btn sm" data-dlgclose>닫기</button></div><div class="db">${body}</div>${foot ? `<div class="df">${foot}</div>` : ''}`;
+    if (!d.open) d.showModal();
+  }
+
+  // ════════════════════════════ 이벤트 ════════════════════════════
+  document.addEventListener('click', ev => {
+    const t = ev.target.closest('[data-go],[data-act],[data-del],[data-mv],[data-mkeval],[data-openq],[data-qclear],[data-print],[data-addit],[data-addlv],[data-delit],[data-dellv],[data-resmode],[data-detail],[data-gpopen],[data-ovclear],[data-tgtapply],[data-gpsort],[data-selgrp],[data-dlgclose]');
+    if (!t) return;
+    const ds = t.dataset;
+    if ('dlgclose' in ds) { $('#dlg').close(); return; }
+    if (ds.go) return go(ds.go);
+    if (ds.del) { const p = S.people.find(x => x.id === ds.del); if (confirm(`‘${p.name || '빈 행'}’을(를) 삭제할까요?`)) { S.people = S.people.filter(x => x.id !== ds.del); delete S.quant[ds.del]; delete S.gp[ds.del]; delete S.qual[ds.del]; save(); render(); } return; }
+    if (ds.mv) { const i = S.people.findIndex(x => x.id === ds.mv), j = i + Number(ds.d); if (j >= 0 && j < S.people.length) { [S.people[i], S.people[j]] = [S.people[j], S.people[i]]; save(); render(); } return; }
+    if (ds.mkeval) { const e = S.people.find(p => p.id === ds.mkeval); const C = DM.compute(S); if (!C.T.length) return; if (C.sheets[e.id].N < 1) return toast('평가할 대상자가 없습니다.'); download(`정성평가_${e.name}.html`, evalFile(e.id), 'text/html'); toast(`${e.name} 평가자용 파일을 저장했습니다.`); render(); return; }
+    if (ds.openq) { ui.qualOpen = ui.qualOpen === ds.openq ? null : ds.openq; if (!S.qual[ds.openq]) S.qual[ds.openq] = { mode: 'rank', ranks: {}, scores: {} }; render(); return; }
+    if (ds.qclear) { if (confirm('이 평가자의 정성평가 자료를 모두 지울까요?')) { S.qual[ds.qclear] = { mode: 'rank', ranks: {}, scores: {} }; save(); render(); } return; }
+    if (ds.print) { ui.printSel = [ds.print]; go('print'); return; }
+    if (ds.addit) { S.criteria.sections[+ds.addit].items.push({ title: `${S.criteria.sections[+ds.addit].items.length + 1}) `, levels: [{ d: '', s: '' }] }); save(); render(); return; }
+    if (ds.addlv) { const [a, b] = ds.addlv.split('.').map(Number); S.criteria.sections[a].items[b].levels.push({ d: '', s: '' }); save(); render(); return; }
+    if (ds.delit) { const [a, b] = ds.delit.split('.').map(Number); S.criteria.sections[a].items.splice(b, 1); save(); render(); return; }
+    if (ds.dellv) { const [a, b, c] = ds.dellv.split('.').map(Number); S.criteria.sections[a].items[b].levels.splice(c, 1); save(); render(); return; }
+    if (ds.resmode) { ui.resMode = ds.resmode; render(); return; }
+    if (ds.detail) { ev.preventDefault(); detailDialog(ds.detail); return; }
+    if (ds.gpopen) { ui.gpOpen[ds.gpopen] = !ui.gpOpen[ds.gpopen]; render(); return; }
+    if (ds.gpsort) { ui.gpSort = ds.gpsort; sessionStorage.setItem('dm-gpsort', ds.gpsort); render(); return; }
+    if (ds.tgtapply) { const [id, w] = ds.tgtapply.split(':'); const inp = $(`[data-tgt="${ds.tgtapply}"]`); applyTarget(id, w, Number(inp && inp.value)); return; }
+    if (ds.ovclear) { if (S.gp[ds.ovclear]) delete S.gp[ds.ovclear].ov; save(); render(); return; }
+    if (ds.selgrp) { const g = DOCS()[+ds.selgrp]; g.items.forEach(i => { if (!ui.printSel.includes(i.id)) ui.printSel.push(i.id); }); render(); return; }
+    const a = ds.act;
+    if (a === 'backup') { download(`다면평가_작업파일_${S.info.school || '학교'}_${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(S, null, 1)); toast('작업 파일을 저장했습니다.'); }
+    else if (a === 'restore') pickFiles('.json,application/json', false, fs => { try { const d = JSON.parse(fs[0].text); if (d.v !== 1 || !Array.isArray(d.people)) throw 0; if (!confirm('현재 자료를 불러온 작업 파일로 바꿀까요?')) return; S = Object.assign(blankState(), d); save(); render(); toast('작업 파일을 불러왔습니다.'); } catch (e) { alert('작업 파일 형식이 아닙니다. (평가자 결과 파일은 [정성평가] 단계에서 불러오세요.)'); } });
+    else if (a === 'wipe') { if (confirm('이 PC 브라우저에 저장된 모든 자료를 지웁니다. 계속할까요?')) { localStorage.removeItem(KEY); S = blankState(); render(); } }
+    else if (a === 'sample35') { if (confirm('연습 자료를 불러오면 현재 자료가 바뀝니다. 계속할까요?')) { S = sample35(3); save(); go('roster'); toast('연습 자료(교원 35명)를 불러왔습니다.'); } }
+    else if (a === 'addRow') { S.people.push({ id: uid(), name: '', birth: '', kind: '교사', target: true, evaluator: false, discipline: '', note: '' }); save(); render(); setTimeout(() => { const ins = $$('input[data-k="name"]'); ins[ins.length - 1]?.focus(); }, 0); }
+    else if (a === 'pasteRoster') showDialog('엑셀에서 붙여넣기', `<p class="note" style="margin-top:0">엑셀의 [성명, 생년월일, (다면평가자 여부: ○ 또는 Y)] 열을 복사해 붙여넣으세요. 한 줄에 한 명입니다.</p><textarea id="pasteBox" rows="12" style="width:100%" placeholder="김민준	650101	○&#10;이서연	700315"></textarea><label class="row note" style="margin-top:6px"><input type="checkbox" id="pasteReplace"> 기존 명단을 지우고 바꾸기</label>`, `<button class="btn" data-dlgclose>취소</button><button class="btn pri" data-act="pasteDo">추가</button>`);
+    else if (a === 'pasteDo') {
+      const lines = $('#pasteBox').value.split(/\r?\n/).map(l => l.split('\t').map(x => x.trim())).filter(c => c[0]);
+      if ($('#pasteReplace').checked) { S.people = []; S.qual = {}; S.quant = {}; S.gp = {}; }
+      lines.forEach(c => S.people.push({ id: uid(), name: c[0], birth: c[1] || '', kind: '교사', target: true, evaluator: /^(o|○|y|yes|예|v|✓|1|다면)/i.test(c[2] || ''), discipline: '', note: '' }));
+      $('#dlg').close(); save(); render(); toast(`${lines.length}명을 추가했습니다.`);
+    }
+    else if (a === 'resetCriteria') { if (confirm('정량평가 세부기준을 엑셀 프로그램의 예시로 되돌릴까요?')) { S.criteria = DEFAULT_CRITERIA(); save(); render(); } }
+    else if (a === 'makeAllEval') { const C = DM.compute(S); C.E.forEach((e, k) => setTimeout(() => download(`정성평가_${e.name}.html`, evalFile(e.id), 'text/html'), k * 400)); toast(`${C.E.length}개 평가자용 파일을 저장합니다(브라우저가 여러 파일 다운로드 허용을 물으면 ‘허용’).`); setTimeout(render, C.E.length * 400 + 100); }
+    else if (a === 'importEval') pickFiles('.json,application/json', true, importEvalResults);
+    else if (a === 'seedRanks') {
+      const C = DM.compute(S); if (C.list.some(o => o.dmTotal == null)) return toast('다면평가 점수가 모두 있어야 합니다.');
+      if (Object.values(S.gp).some(g => g.p || g.q) && !confirm('입력된 교감·교장 순위를 다면평가 순위로 바꿀까요?')) return;
+      const ord = C.list.slice().sort((a, b) => b.dmTotal - a.dmTotal || a.idx - b.idx);
+      ord.forEach((o, k) => { S.gp[o.id] = Object.assign(S.gp[o.id] || {}, { p: k + 1, q: k + 1 }); }); save(); render();
+    }
+    else if (a === 'autoAdj') {
+      const C = DM.compute(S);
+      if (C.checks.done && !C.checks.errors.length) return toast('이미 모든 점검을 통과했습니다. 바꿀 점수가 없습니다.');
+      const r = DM.autoAdjust(S); ui.autoPlan = r;
+      if (!r.ok) return showDialog('평정분포 자동 맞추기 — 맞출 수 없음', `<div class="msg err"><ul style="margin:0 0 0 18px">${r.fail.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
+        <p class="note">평정자·확인자 평정점은 각자의 순위에 따른 등급(수·우·미) 범위 안에서만 바꿀 수 있습니다(평정자·확인자 분포를 지키기 위함). 그 범위로 맞출 수 없으면 교감·교장 순위부터 조정해야 합니다. 예: ‘수’ 자리가 모자라면 다면평가 점수가 높은 교사의 교감·교장 순위를 함께 올립니다. [다면평가 순위로 교감·교장 순위 채우기]로 시작한 뒤 조정하면 대부분 맞출 수 있습니다.</p>`);
+      if (!r.changes.length) return toast('바꿀 점수가 없습니다.');
+      const cell = (a2) => `${f2(a2[0])} → <b>${f2(a2[1])}</b>`;
+      showDialog('평정분포 자동 맞추기 — 변경 내용 확인', `
+        <p style="margin-top:0">⑦총점 기준과 ⑧조정점 기준 등급이 일치하고, 평정자·확인자 분포가 배정표와 같으며, 총점 동점이 없도록 <b>${r.changes.length}명</b>의 요소 점수를 바꿉니다. 평정자·확인자 평정점은 각자 순위의 등급 범위 안에서만 움직이며, 바뀐 차이는 학습지도(모자라면 생활지도·담당업무) 점수에 반영됩니다.</p>
+        ${r.reordered ? '<div class="msg warn">현재 순위 그대로는 맞출 수 없어 일부 교사의 ⑨순위가 바뀝니다(아래 ‘순위’ 열 확인).</div>' : '<div class="msg ok">⑨순위는 바뀌지 않습니다.</div>'}
+        <table class="t"><thead><tr><th>성명</th><th>순위</th><th>맞출 등급</th><th>평정자 평정점</th><th>확인자 평정점</th><th>⑦ 총점</th></tr></thead><tbody>
+        ${r.changes.map(c => `<tr><td class="l">${esc(c.name)}</td><td>${c.oldRank === c.rank ? c.rank : `${c.oldRank} → <b>${c.rank}</b>`}</td><td class="${gcls(c.grade)}">${c.grade}</td><td class="r">${cell(c.p)}</td><td class="r">${cell(c.q)}</td><td class="r">${cell(c.total)}</td></tr>`).join('')}
+        </tbody></table><p class="note">적용 후에도 [자동 맞추기 되돌리기]로 이전 상태로 돌아갈 수 있습니다. 자동 결과는 하나의 제안이므로 교감·교장의 평정 의도에 맞는지 검토하세요.</p>`,
+        `<button class="btn" data-dlgclose>취소</button><button class="btn pri" data-act="autoApply">적용</button>`);
+    }
+    else if (a === 'autoApply') {
+      const r = ui.autoPlan; if (!r) return;
+      ui.undoGp = JSON.parse(JSON.stringify(S.gp));
+      Object.entries(r.ov).forEach(([id, ov]) => { const g = S.gp[id] || (S.gp[id] = {}); g.ov = ov; });
+      ui.autoPlan = null; $('#dlg').close(); save(); render();
+      const C = DM.compute(S); toast(C.checks.errors.length ? '적용했지만 남은 점검 항목이 있습니다. 확인하세요.' : `${r.changes.length}명의 점수를 조정했습니다. 모든 점검 통과.`);
+    }
+    else if (a === 'undoAuto') { if (ui.undoGp && confirm('자동 맞추기 이전 상태로 되돌릴까요?')) { S.gp = ui.undoGp; ui.undoGp = null; save(); render(); toast('되돌렸습니다.'); } }
+    else if (a === 'clearRanks') { if (confirm('교감·교장 순위와 수동조정을 모두 지울까요?')) { S.gp = {}; save(); render(); } }
+    else if (a === 'selNone') { ui.printSel = []; render(); }
+    else if (a === 'preview') { $('#preview').innerHTML = ui.printSel.length ? buildDocs(ui.printSel) : ''; }
+    else if (a === 'doPrint') { if (!ui.printSel.length) return toast('출력할 서식을 선택하세요.'); $('#preview').innerHTML = buildDocs(ui.printSel); setTimeout(() => window.print(), 100); }
+  });
+
+  document.addEventListener('change', ev => {
+    const t = ev.target; const ds = t.dataset;
+    if (ds.sel) { if (t.checked) { if (!ui.printSel.includes(ds.sel)) ui.printSel.push(ds.sel); } else ui.printSel = ui.printSel.filter(x => x !== ds.sel); return; }
+    if (ds.p && (t.type === 'checkbox' || t.tagName === 'SELECT')) { const p = S.people.find(x => x.id === ds.p); p[ds.k] = t.type === 'checkbox' ? t.checked : t.value; save(); render(); return; }
+    if (ds.info && t.tagName === 'SELECT') { S.info[ds.info] = t.value; save(); render(); return; }
+    if (ds.qmode) { const q = S.qual[ds.qmode] || (S.qual[ds.qmode] = {}); q.mode = t.checked ? 'score' : 'rank'; q.ranks = q.ranks || {}; q.scores = q.scores || {}; save(); render(); return; }
+  });
+
+  // 입력 중에는 값만 반영하고, 포커스가 빠질 때 다시 그림(커서 유지)
+  let dirty = false;
+  document.addEventListener('input', ev => {
+    const t = ev.target; const ds = t.dataset; dirty = true;
+    if (ds.info) { S.info[ds.info] = t.value; save(); return; }
+    if (ds.rate) { S.perfRate[ds.rate] = t.value; save(); return; }
+    if (ds.p && t.type !== 'checkbox' && t.tagName !== 'SELECT') { S.people.find(x => x.id === ds.p)[ds.k] = t.value; save(); return; }
+    if (ds.cit) { const [a, b] = ds.cit.split('.').map(Number); S.criteria.sections[a].items[b].title = t.value; save(); return; }
+    if (ds.clv) { const [a, b, c] = ds.clv.split('.').map(Number); S.criteria.sections[a].items[b].levels[c][ds.f] = ds.f === 's' ? t.value : t.value; save(); return; }
+    if (ds.qr) { const [e, p] = ds.qr.split(':'); const q = S.qual[e] || (S.qual[e] = { mode: 'rank', ranks: {}, scores: {} }); q.ranks = q.ranks || {}; const v = t.value.trim(); if (v === '') delete q.ranks[p]; else q.ranks[p] = Number(v); q.src = '직접 입력'; save(); return; }
+    if (ds.qs) { const [e, p] = ds.qs.split(':'); const q = S.qual[e]; q.scores = q.scores || {}; const v = t.value.trim(); if (v === '') delete q.scores[p]; else q.scores[p] = Number(v); q.src = '직접 입력'; save(); return; }
+    if (ds.qn) { const [p, k] = ds.qn.split(':'); const a = S.quant[p] || (S.quant[p] = [null, null, null, null]); const v = t.value.trim(); a[+k] = v === '' ? null : Number(v); save(); return; }
+    if (ds.gr) { const [p, w] = ds.gr.split(':'); const g = S.gp[p] || (S.gp[p] = {}); const v = t.value.trim(); g[w] = v === '' ? null : Number(v); save(); return; }
+    if (ds.ov) { const [p, w, k] = ds.ov.split(':'); const g = S.gp[p] || (S.gp[p] = {}); g.ov = g.ov || {}; g.ov[w] = g.ov[w] || [null, null, null, null, null];
+      const v = t.value.trim(); const o = DM.compute(S).byId[p]; const auto = (w === 'p' ? o.gpP : o.gpQ).auto[+k];
+      g.ov[w][+k] = (v === '' || isNaN(v) || Number(v) === auto) ? null : Number(v); save(); return; }
+  });
+  const LIVE = ['qr', 'qs', 'qn', 'gr', 'ov', 'rate'];
+  document.addEventListener('focusout', ev => {
+    const t = ev.target; if (!t.dataset) return;
+    const k = Object.keys(t.dataset).find(x => LIVE.includes(x) || x === 'p' || x === 'info' || x === 'cit' || x === 'clv');
+    if (!k || !dirty) return;
+    // 다음 칸으로 포커스가 옮겨진 뒤 다시 그리고, 그 칸에 포커스를 돌려줌
+    setTimeout(() => {
+      const a = document.activeElement; const sel = a && a.dataset ? Object.entries(a.dataset).map(([kk, v]) => `[data-${kk.replace(/[A-Z]/g, m => '-' + m.toLowerCase())}="${CSS.escape(v)}"]`).join('') : '';
+      if (t.type === 'checkbox' || !dirty) return;
+      dirty = false;
+      render();
+      if (sel) { const n = $(sel); if (n) { n.focus(); if (n.select) n.select(); } }
+    }, 0);
+  });
+  document.addEventListener('keydown', ev => {
+    if (ev.key !== 'Enter') return; const t = ev.target; if (t.tagName !== 'INPUT') return;
+    if (t.dataset.tgt) { ev.preventDefault(); const [id, w] = t.dataset.tgt.split(':'); applyTarget(id, w, Number(t.value)); return; }
+    const ds = t.dataset; if (!(ds.qr || ds.qs || ds.qn || ds.gr || ds.ov)) return;
+    ev.preventDefault();
+    const ins = $$('input.rk, input.num').filter(i => !i.disabled);
+    const i = ins.indexOf(t);
+    // 같은 열의 다음 행으로
+    const attr = ds.qr ? 'qr' : ds.qs ? 'qs' : ds.qn ? 'qn' : ds.gr ? 'gr' : 'ov';
+    const col = attr === 'qn' ? ds.qn.split(':')[1] : attr === 'gr' ? ds.gr.split(':')[1] : null;
+    const same = ins.filter(x => x.dataset[attr] && (col == null || x.dataset[attr].split(':')[1] === col));
+    const n = same[same.indexOf(t) + 1] || ins[i + 1];
+    if (n) n.focus(); else t.blur();
+  });
+  window.addEventListener('beforeprint', () => { if (step === 'print' && ui.printSel.length) $('#preview').innerHTML = buildDocs(ui.printSel); });
+
+  // 다른 탭에서 바뀐 경우 반영
+  window.addEventListener('storage', e => { if (e.key === KEY) { S = load(); render(); } });
+
+  render();
+})();
+
+</script>
+</body>
+</html>
