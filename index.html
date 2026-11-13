@@ -644,9 +644,18 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
     if (!L) { L = document.createElement('div'); L.id = 'lock'; document.body.appendChild(L); }
     const ok = window.isSecureContext && window.crypto && crypto.subtle;
     L.innerHTML = `<div style="position:fixed;inset:0;background:#14233b;display:grid;place-items:center;z-index:50">
-      <form id="lockForm" style="background:#fff;border-radius:12px;padding:28px 30px;width:min(380px,92vw);box-shadow:0 20px 50px rgba(0,0,0,.35)">
+      <form id="lockForm" style="background:#fff;border-radius:12px;padding:28px 30px;width:min(440px,92vw);box-shadow:0 20px 50px rgba(0,0,0,.35)">
         <h2 style="margin:0 0 4px;font-size:18px">교사 다면평가·근무성적평정 프로그램</h2>
         <p class="note" style="margin:0 0 16px">인사 자료 보호를 위해 비밀번호를 입력하세요.</p>
+        <div style="margin:0 0 16px;padding:11px 13px;border:1px solid #e0a800;border-left:5px solid #e0a800;background:#fff8e1;border-radius:6px;font-size:12.5px;line-height:1.6;color:#5a4500">
+          <strong style="display:block;margin-bottom:3px">⚠️ 사용 전 주의 사항</strong>
+          <ol style="margin:0;padding-left:18px">
+            <li>이 웹프로그램은 <b>교육청에서 제공하는 공식 프로그램이 아닙니다.</b></li>
+            <li>다면평가 업무는 <b>교육청이 제공한 엑셀 프로그램</b>(2026학년도 초등학교 다면평가프로그램)으로 처리하는 것을 기본으로 합니다.</li>
+            <li>이 웹프로그램은 엑셀 프로그램에 <b>오류가 있을 때만 보조 수단</b>으로 쓰십시오.</li>
+            <li>결과는 엑셀 프로그램 결과나 관련 공문·매뉴얼 기준과 <b>반드시 대조해 확인</b>한 뒤 활용하십시오.</li>
+          </ol>
+        </div>
         ${ok ? `<input type="password" id="lockPw" autocomplete="current-password" placeholder="비밀번호" style="width:100%;padding:9px 10px;font-size:15px">
         <div id="lockMsg" style="min-height:20px;margin:8px 0;font-size:13px;color:#b42318">${esc(msg || '')}</div>
         <button class="btn pri" style="width:100%;justify-content:center;padding:9px" id="lockBtn">열기</button>
