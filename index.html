@@ -643,24 +643,41 @@ const EVAL_TEMPLATE = "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"
     let L = $('#lock');
     if (!L) { L = document.createElement('div'); L.id = 'lock'; document.body.appendChild(L); }
     const ok = window.isSecureContext && window.crypto && crypto.subtle;
-    L.innerHTML = `<div style="position:fixed;inset:0;background:#14233b;display:grid;place-items:center;z-index:50">
-      <form id="lockForm" style="background:#fff;border-radius:12px;padding:28px 30px;width:min(440px,92vw);box-shadow:0 20px 50px rgba(0,0,0,.35)">
-        <h2 style="margin:0 0 4px;font-size:18px">교사 다면평가·근무성적평정 프로그램</h2>
-        <p class="note" style="margin:0 0 16px">인사 자료 보호를 위해 비밀번호를 입력하세요.</p>
-        <div style="margin:0 0 16px;padding:11px 13px;border:1px solid #e0a800;border-left:5px solid #e0a800;background:#fff8e1;border-radius:6px;font-size:12.5px;line-height:1.6;color:#5a4500">
-          <strong style="display:block;margin-bottom:3px">⚠️ 사용 전 주의 사항</strong>
-          <ol style="margin:0;padding-left:18px">
-            <li>이 웹프로그램은 <b>교육청에서 제공하는 공식 프로그램이 아닙니다.</b></li>
-            <li>다면평가 업무는 <b>교육청이 제공한 엑셀 프로그램</b>(2026학년도 초등학교 다면평가프로그램)으로 처리하는 것을 기본으로 합니다.</li>
-            <li>이 웹프로그램은 엑셀 프로그램에 <b>오류가 있을 때만 보조 수단</b>으로 쓰십시오.</li>
-            <li>결과는 엑셀 프로그램 결과나 관련 공문·매뉴얼 기준과 <b>반드시 대조해 확인</b>한 뒤 활용하십시오.</li>
-          </ol>
+    L.innerHTML = `<div style="position:fixed;inset:0;background:#14233b;display:grid;place-items:center;z-index:50;padding:2vh 2vw;overflow:auto">
+      <form id="lockForm" style="background:#fff;border-radius:12px;padding:24px 28px;width:min(980px,96vw);max-height:96vh;overflow:auto;box-shadow:0 20px 50px rgba(0,0,0,.35)">
+        <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin:0 0 16px;padding-bottom:12px;border-bottom:1px solid #e4e7ec">
+          <h2 style="margin:0;font-size:19px">교사 다면평가·근무성적평정 프로그램</h2>
+          <p class="note" style="margin:0">인사 자료 보호를 위해 비밀번호를 입력하세요.</p>
         </div>
-        ${ok ? `<input type="password" id="lockPw" autocomplete="current-password" placeholder="비밀번호" style="width:100%;padding:9px 10px;font-size:15px">
-        <div id="lockMsg" style="min-height:20px;margin:8px 0;font-size:13px;color:#b42318">${esc(msg || '')}</div>
-        <button class="btn pri" style="width:100%;justify-content:center;padding:9px" id="lockBtn">열기</button>
-        <p class="note" style="margin:14px 0 0;font-size:12px">입력한 자료는 이 비밀번호로 암호화되어 이 PC 브라우저에만 저장됩니다. ${IDLE_MIN}분 동안 사용하지 않으면 자동으로 잠깁니다.</p>`
-        : `<div class="msg err">이 브라우저에서는 암호화 기능(Web Crypto)을 쓸 수 없습니다. 최신 크롬 또는 엣지로 파일을 열어 주세요.</div>`}
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px;align-items:start">
+          <div>
+            <div style="margin:0 0 14px;padding:11px 13px;border:1px solid #e0a800;border-left:5px solid #e0a800;background:#fff8e1;border-radius:6px;font-size:12.5px;line-height:1.6;color:#5a4500">
+              <strong style="display:block;margin-bottom:3px">⚠️ 사용 전 주의 사항</strong>
+              <ol style="margin:0;padding-left:18px">
+                <li>이 웹프로그램은 <b>교육청에서 제공하는 공식 프로그램이 아닙니다.</b></li>
+                <li>다면평가 업무는 <b>교육청이 제공한 엑셀 프로그램</b>(2026학년도 초등학교 다면평가프로그램)으로 처리하는 것을 기본으로 합니다.</li>
+                <li>이 웹프로그램은 엑셀 프로그램에 <b>오류가 있을 때만 보조 수단</b>으로 쓰십시오.</li>
+                <li>결과는 엑셀 프로그램 결과나 관련 공문·매뉴얼 기준과 <b>반드시 대조해 확인</b>한 뒤 활용하십시오.</li>
+              </ol>
+            </div>
+            ${ok ? `<input type="password" id="lockPw" autocomplete="current-password" placeholder="비밀번호" style="width:100%;padding:9px 10px;font-size:15px">
+            <div id="lockMsg" style="min-height:20px;margin:8px 0;font-size:13px;color:#b42318">${esc(msg || '')}</div>
+            <button class="btn pri" style="width:100%;justify-content:center;padding:9px" id="lockBtn">열기</button>
+            <p class="note" style="margin:12px 0 0;font-size:12px">입력한 자료는 이 비밀번호로 암호화되어 이 PC 브라우저에만 저장됩니다. ${IDLE_MIN}분 동안 사용하지 않으면 자동으로 잠깁니다.</p>`
+            : `<div class="msg err">이 브라우저에서는 암호화 기능(Web Crypto)을 쓸 수 없습니다. 최신 크롬 또는 엣지로 파일을 열어 주세요.</div>`}
+          </div>
+          <div style="padding:11px 13px;border:1px solid #c9d6ea;background:#f3f7fc;border-radius:6px;font-size:12.5px;line-height:1.65;color:#1d3d6b">
+            <strong style="display:block;margin-bottom:3px">이 웹프로그램의 장점 (엑셀 프로그램과 비교)</strong>
+            <ol style="margin:0;padding-left:18px">
+              <li><b>매크로·파일 연결 문제 없음</b> — 결과 파일을 버튼 하나로 불러오고, 크롬이나 엣지만 있으면 됩니다.</li>
+              <li><b>보안 강화</b> — 접속 비밀번호, 자료는 AES-256으로 암호화해 이 PC에만 저장, 30분 미사용 시 자동 잠금, 평가자 파일도 암호화합니다.</li>
+              <li><b>자동 점검</b> — 등급 분포, 동점, 징계 제한, 순위 중복·누락, 다면평가자 최소 인원을 자동으로 확인합니다.</li>
+              <li><b>수동조정 지원</b> — 순위는 그대로 두고 점수를 가장 적게 바꾸는 값을 자동으로 계산하며, 되돌리기도 됩니다.</li>
+              <li><b>계산 정확도 보완</b> — 실평가대상자 수를 정확히 계산하고, 조견표의 소수 오차 때문에 등급이 어긋나지 않게 합니다.</li>
+              <li><b>출력 편의</b> — 모든 서식을 한곳에서 출력하고, 배부용에는 평가자 이름이 나오지 않으며, 성과급용은 따로 출력됩니다.</li>
+            </ol>
+          </div>
+        </div>
       </form></div>`;
     L.style.display = '';
     const f = $('#lockForm');
